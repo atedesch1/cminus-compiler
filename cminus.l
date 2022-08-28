@@ -46,7 +46,6 @@ whitespace  [ \t]+
                   char foundEnd = 0;
                   do { 
                     c = input();
-                    
                     switch(c) {
                       case '\n':
                         lineno++;
@@ -56,7 +55,7 @@ whitespace  [ \t]+
                       case '*':
                         foundTimesNext = 1;
                         break;
-                      case '\\':
+                      case '/':
                         if (foundTimesNext == 1)
                           foundEnd = 1;
                         break;
