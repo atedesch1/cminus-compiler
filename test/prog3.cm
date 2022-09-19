@@ -1,0 +1,18 @@
+/*comment* comment*comment***/
+/***/ /* comment */
+
+/*
+** multi
+** line
+** comment
+**/
+
+void main(void)
+
+{
+  int i=0;
+    /* random comment */
+  int v=0;
+  int u=(v*i) - v;
+  return;
+}
