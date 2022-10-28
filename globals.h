@@ -6,6 +6,27 @@
 #include <ctype.h>
 #include <string.h>
 
+/* Yacc/Bison generates internally its own values
+ * for the tokens. Other files can access these values
+ * by including the tab.h file generated using the
+ * Yacc/Bison option -d ("generate header")
+ *
+ * The YYPARSER flag prevents inclusion of the tab.h
+ * into the Yacc/Bison output itself
+ */
+
+#ifndef YYPARSER
+
+/* the name of the following file may change */
+#include "cminus.tab.h"
+
+/* ENDFILE is implicitly defined by Yacc/Bison,
+ * and not included in the tab.h file
+ */
+#define ENDFILE 0
+
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -17,26 +38,41 @@
 /* MAXRESERVED = the number of reserved words */
 #define MAXRESERVED 6
 
-typedef enum 
-    /* book-keeping tokens */
-   {ENDFILE,ERROR,
-    /* reserved words */
-    ELSE, IF, INT, RETURN, VOID, WHILE,
-    /* multicharacter tokens */
-    ID, NUM,
-    /* special symbols */
-    PLUS, MINUS, TIMES, OVER, LESS_THAN, LESS_EQUAL_THAN,
-    GREATER_THAN, GREATER_EQUAL_THAN, EQUAL, DIFF, ASSIGN,
-    SEMICOLON, COMMA, LEFT_PARENTHESIS, RIGHT_PARENTHESIS, 
-    LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET, LEFT_CURLY_BRACKET, 
-    RIGHT_CURLY_BRACKET
-   } TokenType;
+/* Yacc/Bison generates its own integer values
+ * for tokens
+ */
+typedef int TokenType; 
 
 extern FILE* source; /* source code text file */
 extern FILE* listing; /* listing output text file */
 extern FILE* code; /* code text file for TM simulator */
 
 extern int lineno; /* source line number for listing */
+
+/**************************************************/
+/***********   Syntax tree for parsing ************/
+/**************************************************/
+
+typedef enum {StmtK,ExpK} NodeKind;
+typedef enum {IfK,RepeatK,AssignK,ReadK,WriteK} StmtKind;
+typedef enum {OpK,ConstK,IdK} ExpKind;
+
+/* ExpType is used for type checking */
+typedef enum {Void,Integer,Boolean} ExpType;
+
+#define MAXCHILDREN 3
+
+typedef struct treeNode
+   { struct treeNode * child[MAXCHILDREN];
+     struct treeNode * sibling;
+     int lineno;
+     NodeKind nodekind;
+     union { StmtKind stmt; ExpKind exp;} kind;
+     union { TokenType op;
+             int val;
+             char * name; } attr;
+     ExpType type; /* for type checking of exps */
+   } TreeNode;
 
 /**************************************************/
 /***********   Flags for tracing       ************/
