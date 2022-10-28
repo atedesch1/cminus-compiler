@@ -5,4 +5,4 @@ build:
 	gcc -o cminus *.o -lfl
 
 clean:
-	$(RM) cminus *.o *~ *.yy.c
+	$(RM) cminus *.o *~ *.yy.c *.tab.c *.tab.h
