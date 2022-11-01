@@ -33,7 +33,7 @@ declaracao          : var_declaracao { }
                     | fun_declaracao { }
                     ;
 var_declaracao      : tipo_especificador ID SEMICOLON { }
-                    | tipo_especificador ID RIGHT_SQUARE_BRACKET NUM LEFT_SQUARE_BRACKET SEMICOLON { }
+                    | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON { }
                     ;
 tipo_especificador  : INT { }
                     | VOID { }

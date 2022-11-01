@@ -4,7 +4,6 @@
 #include "scan.h"
 /* lexeme of identifier or reserved word */
 char tokenString[MAXTOKENLEN + 1];
-extern int yylex(void);
 %}
 
 digit       [0-9]
