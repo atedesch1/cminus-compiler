@@ -4,14 +4,18 @@
 #include "scan.h"
 /* lexeme of identifier or reserved word */
 char tokenString[MAXTOKENLEN + 1];
+extern int yylex(void);
 %}
+
 digit       [0-9]
 number      {digit}+
 letter      [a-zA-Z]
 identifier  {letter}+
 newline     \n
 whitespace  [ \t]+
+
 %%
+
 "if"            {return IF;}
 "else"          {return ELSE;}
 "int"           {return INT;}
@@ -68,6 +72,7 @@ whitespace  [ \t]+
                 }
 .               {return ERROR;}
 %%
+
 TokenType getToken(void) {
   static int firstTime = TRUE;
   TokenType currentToken;
