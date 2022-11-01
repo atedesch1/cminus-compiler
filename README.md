@@ -5,12 +5,6 @@
   - Alvaro Tedeschi Neto (ITA, COMP-23)
   - Davi Muniz Vasconcelos (ITA, COMP-23)
 
-## Environment
-```
-sudo apt-get update
-sudo apt-get install flex-old
-```
-
 ## Build
 ```
 make build
