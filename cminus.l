@@ -4,6 +4,12 @@
 #include "scan.h"
 /* lexeme of identifier or reserved word */
 char tokenString[MAXTOKENLEN + 1];
+
+/* lexeme of the last ID token */
+char idName[MAXTOKENLEN + 1];
+
+/* lexeme of the last NUM token */
+int numValue;
 %}
 
 digit       [0-9]
@@ -83,6 +89,16 @@ TokenType getToken(void) {
   }
   currentToken = yylex();
   strncpy(tokenString, yytext, MAXTOKENLEN);
+  switch(currentToken) {
+    case ID:
+      strncpy(idName, yytext, MAXTOKENLEN);
+      break;
+    case NUM:
+      numValue = atoi(tokenString);
+      break;
+    default:
+      break;
+  }
   if (TraceScan) {
     fprintf(listing,"\t%d: ", lineno);
     printToken(currentToken, tokenString);

@@ -7,6 +7,12 @@
 /* Stores the lexeme of each token */
 extern char tokenString[MAXTOKENLEN + 1];
 
+/* Stores the name of the last ID */
+extern char idName[MAXTOKENLEN + 1];
+
+/* Stores the value of the last NUM */
+extern int numValue;
+
 /* Returns the 
  * next token in source file
  */

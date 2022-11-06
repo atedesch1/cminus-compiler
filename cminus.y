@@ -6,7 +6,7 @@
 #include "scan.h"
 #include "parse.h"
 
-#define YYSTYPE TreeNode *
+#define YYSTYPE TreeNode*
 static char * savedName; /* for use in assignments */
 static int savedLineNo;  /* ditto */
 static TreeNode * savedTree; /* stores syntax tree for later return */
@@ -24,19 +24,39 @@ int yyerror(char *s);
 
 %% /* Grammar for CMINUS */
 
-programa            : declaracao_lista { }
+programa            : declaracao_lista { savedTree = $1; }
                     ;
-declaracao_lista    : declaracao_lista declaracao { }
-                    | declaracao { }
+declaracao_lista    : declaracao_lista declaracao { 
+                        YYSTYPE t = $1;
+                        if (t != NULL) {
+                          while (t->sibling != NULL) {
+                            t = t->sibling;
+                          }
+                          t->sibling = $2;
+                          $$ = $1;
+                        }
+                        else $$ = $1;
+                      }
+                    | declaracao { $$ = $1; }
                     ;
-declaracao          : var_declaracao { }
-                    | fun_declaracao { }
+declaracao          : var_declaracao { $$ = $1; }
+                    | fun_declaracao { $$ = $1; }
                     ;
-var_declaracao      : tipo_especificador ID SEMICOLON { }
-                    | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON { }
+var_declaracao      : INT ID SEMICOLON {
+                        $$ = newStmtNode(VariableDeclaration);
+                        $$->attr.name = copyString(idName);
+                        $$->type = Integer;
+                      }
+                    | INT ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
+                        $$ = newStmtNode(ArrayDeclaration);
+                        $$->attr.name = copyString(idName);
+                        $$->type = Integer;
+                        $$->child[0] = newExpNode(ConstK);
+                        $$->child[0]->attr.val = numValue;
+                      }
                     ;
-tipo_especificador  : INT { }
-                    | VOID { }
+tipo_especificador  : INT { $$ = $1; }
+                    | VOID { $$ = $1; }
                     ;
 fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl { }
                     ;

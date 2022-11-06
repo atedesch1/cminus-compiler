@@ -144,17 +144,35 @@ void printTree(TreeNode *tree)
         case IfK:
           fprintf(listing, "If\n");
           break;
-        case RepeatK:
-          fprintf(listing, "Repeat\n");
-          break;
         case AssignK:
           fprintf(listing, "Assign to: %s\n", tree->attr.name);
           break;
-        case ReadK:
-          fprintf(listing, "Read: %s\n", tree->attr.name);
+        case VariableDeclaration:
+          fprintf(listing, "Variable declaration\n");
+          printSpaces(); printSpaces();
+          switch(tree->type) {
+            case Integer:
+              fprintf(listing, "Type: Int\n");
+              break;
+            default:
+              break;
+          }
+          printSpaces(); printSpaces(); printSpaces();
+          fprintf(listing, "Id: %s\n", tree->attr.name);
           break;
-        case WriteK:
-          fprintf(listing, "Write\n");
+        case ArrayDeclaration:
+          fprintf(listing, "Array declaration\n");
+          printSpaces(); printSpaces();
+          switch(tree->type) {
+            case Integer:
+              fprintf(listing, "Type: Int\n");
+              break;
+            default:
+              break;
+          }
+          printSpaces(); printSpaces(); printSpaces();
+          fprintf(listing, "Id: %s\n", tree->attr.name);
+          printSpaces(); printSpaces();
           break;
         default:
           fprintf(listing, "Unknown ExpNode kind\n");
