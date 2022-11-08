@@ -40,55 +40,82 @@ fator ativacao args arg_lista */
 programa            : declaracao_lista { savedTree = $1; }
                     ;
 declaracao_lista    : declaracao_lista declaracao { 
-                        YYSTYPE t = $1;
-                        if (t != NULL) {
-                          while (t->sibling != NULL) {
-                            t = t->sibling;
-                          }
-                          t->sibling = $2;
-                          $$ = $1;
+                      YYSTYPE t = $1;
+                      if (t != NULL) {
+                        while (t->sibling != NULL) {
+                          t = t->sibling;
                         }
-                        else $$ = $1;
+                        t->sibling = $2;
+                        $$ = $1;
                       }
+                      else $$ = $1;
+                    }
                     | declaracao { $$ = $1; }
                     ;
 declaracao          : var_declaracao { $$ = $1; }
                     | fun_declaracao { $$ = $1; }
                     ;
 var_declaracao      : tipo_especificador ID SEMICOLON {
-                        $$ = $1;
-                        $$->child[0] = newIdNode(Variable);
-                        $$->child[0]->attr.name = copyString(idName);
-                      }
+                      $$ = $1;
+                      $$->child[0] = newIdNode(Variable);
+                      $$->child[0]->attr.name = copyString(idName);
+                    }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
-                        $$ = $1;
-                        $$->child[0] = newIdNode(Array);
-                        $$->child[0]->attr.name = copyString(idName);
-                        $$->child[0]->child[0] = newExpNode(Constant);
-                        $$->child[0]->child[0]->attr.val = numValue;
-                      }
+                      $$ = $1;
+                      $$->child[0] = newIdNode(Array);
+                      $$->child[0]->attr.name = copyString(idName);
+                      $$->child[0]->child[0] = newExpNode(Constant);
+                      $$->child[0]->child[0]->attr.val = numValue;
+                    }
                     ;
 tipo_especificador  : INT { $$ = newTypeNode(Int); }
                     | VOID { $$ = newTypeNode(Void); }
                     ;
-fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl { }
+fun_declaracao      : tipo_especificador ID { 
+                      savedName = copyString(idName);
+                    }
+                      LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
+                      $$ = $1;
+                      $$->child[0] = newIdNode(Function);
+                      $$->child[0]->attr.name = copyString(savedName);
+                      $$->child[0]->child[0] = $5;
+                      $$->child[0]->child[1] = $7;
+                    }
                     ;
-params              : param_lista { }
-                    | VOID { }
+params              : param_lista { $$ = $1; }
+                    | VOID { $$ = newTypeNode(Void); }
                     ;
-param_lista         : param_lista COMMA param { }
-                    | param                   { }
+param_lista         : param_lista COMMA param {
+                      YYSTYPE t = $1;
+                      if (t != NULL) {
+                        while (t->sibling != NULL) {
+                          t = t->sibling;
+                        }
+                        t->sibling = $3;
+                        $$ = $1;
+                      }
+                      else $$ = $1;
+                    }
+                    | param { $$ = $1; }
                     ;
-param               : tipo_especificador ID                                          { }
-                    | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET { }
+param               : tipo_especificador ID { 
+                      $$ = $1;
+                      $$->child[0] = newIdNode(Variable);
+                      $$->child[0]->attr.name = copyString(idName);
+                    }
+                    | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET {
+                      $$ = $1;
+                      $$->child[0] = newIdNode(Array);
+                      $$->child[0]->attr.name = copyString(idName);
+                    }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET { }
                     ;
 local_declaracoes   : local_declaracoes var_declaracao { }
-                    | %empty { }
+                    | %empty { $$ = NULL; }
                     ;
 statement_lista     : statement_lista statement { }
-                    | %empty { }
+                    | %empty { $$ = NULL; }
                     ;
 statement           : expressao_decl  { }
                     | composto_decl   { }
