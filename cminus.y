@@ -15,12 +15,25 @@ int yyerror(char *s);
 
 %}
 
+%union {
+  TreeNode *node;
+}
+
 %token ELSE IF INT RETURN VOID WHILE
 %token ID NUM
 %token PLUS MINUS TIMES OVER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN 
        EQUAL DIFF ASSIGN SEMICOLON COMMA LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_SQUARE_BRACKET 
        RIGHT_SQUARE_BRACKET LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
 %token ERROR
+
+%type <node>
+declaracao_lista declaracao var_declaracao tipo_especificador 
+fun_declaracao params param_lista param
+composto_decl local_declaracoes statement_lista statement
+expressao_decl selecao_decl iteracao_decl retorno_decl 
+expressao var simples_expressao relacional 
+soma_expressao soma termo mult 
+fator ativacao args arg_lista
 
 %% /* Grammar for CMINUS */
 

@@ -2,3 +2,5 @@
 *.yy.c
 .vscode
 .idea
+*.tab.*
+cminus
