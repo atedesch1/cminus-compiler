@@ -14,26 +14,26 @@ static int yylex(void);
 int yyerror(char *s);
 
 %}
-
+/* 
 %union {
-  TreeNode *node;
-}
+  TreeNode* node;
+} */
 
 %token ELSE IF INT RETURN VOID WHILE
 %token ID NUM
 %token PLUS MINUS TIMES OVER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN 
-       EQUAL DIFF ASSIGN SEMICOLON COMMA LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_SQUARE_BRACKET 
-       RIGHT_SQUARE_BRACKET LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
+             EQUAL DIFF ASSIGN SEMICOLON COMMA LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_SQUARE_BRACKET 
+             RIGHT_SQUARE_BRACKET LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
 %token ERROR
 
-%type <node>
+/* %type <node>
 declaracao_lista declaracao var_declaracao tipo_especificador 
 fun_declaracao params param_lista param
 composto_decl local_declaracoes statement_lista statement
 expressao_decl selecao_decl iteracao_decl retorno_decl 
 expressao var simples_expressao relacional 
 soma_expressao soma termo mult 
-fator ativacao args arg_lista
+fator ativacao args arg_lista */
 
 %% /* Grammar for CMINUS */
 
@@ -55,21 +55,21 @@ declaracao_lista    : declaracao_lista declaracao {
 declaracao          : var_declaracao { $$ = $1; }
                     | fun_declaracao { $$ = $1; }
                     ;
-var_declaracao      : INT ID SEMICOLON {
-                        $$ = newStmtNode(VariableDeclaration);
-                        $$->attr.name = copyString(idName);
-                        $$->type = Integer;
+var_declaracao      : tipo_especificador ID SEMICOLON {
+                        $$ = $1;
+                        $$->child[0] = newIdNode(Variable);
+                        $$->child[0]->attr.name = copyString(idName);
                       }
-                    | INT ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
-                        $$ = newStmtNode(ArrayDeclaration);
-                        $$->attr.name = copyString(idName);
-                        $$->type = Integer;
-                        $$->child[0] = newExpNode(ConstK);
-                        $$->child[0]->attr.val = numValue;
+                    | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
+                        $$ = $1;
+                        $$->child[0] = newIdNode(Array);
+                        $$->child[0]->attr.name = copyString(idName);
+                        $$->child[0]->child[0] = newExpNode(Constant);
+                        $$->child[0]->child[0]->attr.val = numValue;
                       }
                     ;
-tipo_especificador  : INT { $$ = $1; }
-                    | VOID { $$ = $1; }
+tipo_especificador  : INT { $$ = newTypeNode(Int); }
+                    | VOID { $$ = newTypeNode(Void); }
                     ;
 fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl { }
                     ;
