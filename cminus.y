@@ -83,7 +83,7 @@ fun_declaracao      : tipo_especificador ID {
                     }
                     ;
 params              : param_lista { $$ = $1; }
-                    | VOID { $$ = newTypeNode(Void); }
+                    | VOID { $$ = NULL; }
                     ;
 param_lista         : param_lista COMMA param {
                       YYSTYPE t = $1;
@@ -109,22 +109,52 @@ param               : tipo_especificador ID {
                       $$->child[0]->attr.name = copyString(idName);
                     }
                     ;
-composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET { }
+composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
+                      YYSTYPE t = $2;
+                      if (t != NULL) {
+                        while (t->sibling != NULL) {
+                          t = t->sibling;
+                        }
+                        t->sibling = $3;
+                        $$ = $2;
+                      }
+                      else $$ = $3;
+                    }
                     ;
-local_declaracoes   : local_declaracoes var_declaracao { }
+local_declaracoes   : local_declaracoes var_declaracao {
+                      YYSTYPE t = $1;
+                      if (t != NULL) {
+                        while (t->sibling != NULL) {
+                          t = t->sibling;
+                        }
+                        t->sibling = $2;
+                        $$ = $1;
+                      }
+                      else $$ = $2;
+                    }
                     | %empty { $$ = NULL; }
                     ;
-statement_lista     : statement_lista statement { }
+statement_lista     : statement_lista statement { 
+                      YYSTYPE t = $1;
+                      if (t != NULL) {
+                        while (t->sibling != NULL) {
+                          t = t->sibling;
+                        }
+                        t->sibling = $2;
+                        $$ = $1;
+                      }
+                      else $$ = $2;
+                    }
                     | %empty { $$ = NULL; }
                     ;
-statement           : expressao_decl  { }
-                    | composto_decl   { }
-                    | selecao_decl    { }
-                    | iteracao_decl   { }
-                    | retorno_decl    { }
+statement           : expressao_decl  { $$ = $1; }
+                    | composto_decl   { $$ = $1; }
+                    | selecao_decl    { $$ = $1; }
+                    | iteracao_decl   { $$ = $1; }
+                    | retorno_decl    { $$ = $1; }
                     ;
-expressao_decl      : expressao SEMICOLON { }
-                    | SEMICOLON { }
+expressao_decl      : expressao SEMICOLON { $$ = $1; }
+                    | SEMICOLON { $$ = NULL; }
                     ;
 selecao_decl        : IF LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement { }
                     | IF LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement ELSE statement { }
