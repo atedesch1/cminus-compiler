@@ -252,6 +252,10 @@ void printTree(TreeNode *tree)
         fprintf(listing, "Unknown node kind\n");
       for (i = 0; i < MAXCHILDREN; i++)
         printTree(tree->child[i]);
+      if (tree->sibling != NULL) {
+        printSpaces();
+        fprintf(listing, "||\n");
+      }
       tree = tree->sibling;
   }
   UNINDENT;
