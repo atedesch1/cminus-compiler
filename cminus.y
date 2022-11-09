@@ -185,7 +185,7 @@ retorno_decl        : RETURN SEMICOLON {
                     ;
 expressao           : var ASSIGN expressao { 
                       $$ = newStmtNode(Assign);
-                      $$->child[0] = $1;
+                      $$->child[0] = $1; /* convention: assigned variable is the left child */
                       $$->child[1] = $3;
                       // $$->type = $$->child[1]->type; /* todo: review this line */
                     }
