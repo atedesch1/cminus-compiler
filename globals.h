@@ -60,7 +60,7 @@ typedef enum {Variable, Array, Function} IdKind;
 typedef enum {Void, Int} TypeKind;
 
 /* ExpType is used for type checking */
-typedef enum {VoidType, IntegerType} ExpType;
+typedef enum {VoidType, IntegerType, BooleanType} ExpType;
 
 #define MAXCHILDREN 3
 
