@@ -175,11 +175,11 @@ iteracao_decl       : WHILE LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS stateme
                     }
                     ;
 retorno_decl        : RETURN SEMICOLON { 
-                      $$ = newStmtNode(Return);
+                      $$ = newExpNode(Return);
                       $$->type = VoidType;
                     }
                     | RETURN expressao SEMICOLON { 
-                      $$ = newStmtNode(Return);
+                      $$ = newExpNode(Return);
                       $$->child[0] = $2;
                     }
                     ;
