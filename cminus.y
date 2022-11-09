@@ -282,7 +282,7 @@ ativacao            : ID {
                       LEFT_PARENTHESIS args RIGHT_PARENTHESIS { 
                       $$ = newIdNode(Function);
                       $$->attr.name = copyString(savedName);
-                      $$->child[0] = $2;
+                      $$->child[0] = $4;
                     }
                     ;
 args                : arg_lista { $$ = $1; }
