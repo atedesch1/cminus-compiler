@@ -1,0 +1,12 @@
+int function(int b[], int c) {
+    int variable;
+    variable = 5;
+    return variable;
+}
+
+void main(void) {
+    int a[10];
+    a[7] = 5;
+    a[3 * 1 + 2] = 3;
+    return a[5];
+}
