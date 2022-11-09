@@ -156,54 +156,150 @@ statement           : expressao_decl  { $$ = $1; }
 expressao_decl      : expressao SEMICOLON { $$ = $1; }
                     | SEMICOLON { $$ = NULL; }
                     ;
-selecao_decl        : IF LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement { }
-                    | IF LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement ELSE statement { }
+selecao_decl        : IF LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement { 
+                      $$ = newStmtNode(If);
+                      $$->child[0] = $3;
+                      $$->child[1] = $5;
+                    }
+                    | IF LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement ELSE statement { 
+                      $$ = newStmtNode(If);
+                      $$->child[0] = $3;
+                      $$->child[1] = $5;
+                      $$->child[2] = $7;
+                    }
                     ;
-iteracao_decl       : WHILE LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement { }
+iteracao_decl       : WHILE LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS statement {
+                      $$ = newStmtNode(While);
+                      $$->child[0] = $3;
+                      $$->child[1] = $5;
+                    }
                     ;
-retorno_decl        : RETURN SEMICOLON           { }
-                    | RETURN expressao SEMICOLON { }
+retorno_decl        : RETURN SEMICOLON { 
+                      $$ = newStmtNode(Return);
+                      $$->type = VoidType;
+                    }
+                    | RETURN expressao SEMICOLON { 
+                      $$ = newStmtNode(Return);
+                      $$->child[0] = $2;
+                    }
                     ;
-expressao           : var ASSIGN expressao { }
-                    | simples_expressao    { }
+expressao           : var ASSIGN expressao { 
+                      $$ = newStmtNode(Assign);
+                      $$->child[0] = $1;
+                      $$->child[1] = $3;
+                      // $$->type = $$->child[1]->type; /* todo: review this line */
+                    }
+                    | simples_expressao { $$ = $1; }
                     ;
-var                 : ID { }
-                    | ID LEFT_SQUARE_BRACKET expressao RIGHT_SQUARE_BRACKET { }
+var                 : ID { 
+                      $$ = newIdNode(Variable);
+                      $$->attr.name = copyString(idName);
+                    }
+                    | ID {
+                      savedName = copyString(idName);
+                    } LEFT_SQUARE_BRACKET expressao RIGHT_SQUARE_BRACKET { 
+                      $$ = newIdNode(Array);
+                      $$->attr.name = copyString(idName);
+                      $$->child[0] = $3;
+                    }
                     ;
-simples_expressao   : soma_expressao relacional soma_expressao { }
-                    | soma_expressao { }
+simples_expressao   : soma_expressao relacional soma_expressao { 
+                      $$ = $2;
+                      $$->child[0] = $1;
+                      $$->child[1] = $3;
+                    }
+                    | soma_expressao { $$ = $1; }
                     ;
-relacional          : LESS_EQUAL_THAN     { }
-                    | LESS_THAN           { }
-                    | GREATER_THAN        { }
-                    | GREATER_EQUAL_THAN  { }
-                    | EQUAL               { }
-                    | DIFF                { }
+relacional          : LESS_EQUAL_THAN     { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = LESS_EQUAL_THAN;
+                    }
+                    | LESS_THAN { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = LESS_THAN;
+                    }
+                    | GREATER_THAN { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = GREATER_THAN;
+                    }
+                    | GREATER_EQUAL_THAN { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = GREATER_EQUAL_THAN;
+                    }
+                    | EQUAL { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = EQUAL;
+                    }
+                    | DIFF { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = DIFF;
+                    }
                     ;
-soma_expressao      : soma_expressao soma termo { }
-                    | termo                     { }
+soma_expressao      : soma_expressao soma termo { 
+                      $$ = $2;
+                      $$->child[0] = $1;
+                      $$->child[1] = $3;
+                    }
+                    | termo { $$ = $1; }
                     ;
-soma                : PLUS  { }
-                    | MINUS { }
+soma                : PLUS { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = PLUS;
+                    }
+                    | MINUS { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = MINUS;
+                    }
                     ;
-termo               : termo mult fator { }
-                    | fator            { }
+termo               : termo mult fator { 
+                      $$ = $2;
+                      $$->child[0] = $1;
+                      $$->child[1] = $3;
+                    }
+                    | fator { $$ = $1; }
                     ;
-mult                : TIMES { }
-                    | OVER  { }
+mult                : TIMES { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = TIMES;
+                    }
+                    | OVER { 
+                      $$ = newExpNode(Operator);
+                      $$->attr.op = OVER;
+                    }
                     ;
-fator               : LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS { }
-                    | var                                          { }
-                    | ativacao                                     { }
-                    | NUM                                          { }
+fator               : LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS { $$ = $2; }
+                    | var { $$ = $1; }
+                    | ativacao { $$ = $1; }
+                    | NUM { 
+                      $$ = newExpNode(Constant);
+                      $$->attr.val = numValue;
+                      $$->type = IntegerType;
+                    }
                     ;
-ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS { }
+ativacao            : ID {
+                      savedName = copyString(idName);
+                    }
+                      LEFT_PARENTHESIS args RIGHT_PARENTHESIS { 
+                      $$ = newIdNode(Function);
+                      $$->attr.name = copyString(savedName);
+                      $$->child[0] = $2;
+                    }
                     ;
-args                : arg_lista { }
-                    | %empty { }
+args                : arg_lista { $$ = $1; }
+                    | %empty { $$ = NULL; }
                     ;
-arg_lista           : arg_lista COMMA expressao { }
-                    | expressao                 { }
+arg_lista           : arg_lista COMMA expressao {
+                      YYSTYPE t = $1;
+                      if (t != NULL) {
+                        while (t->sibling != NULL) {
+                          t = t->sibling;
+                        }
+                        t->sibling = $3;
+                        $$ = $1;
+                      }
+                      else $$ = $3;
+                    }
+                    | expressao { $$ = $1; }
                     ;
 
 %%

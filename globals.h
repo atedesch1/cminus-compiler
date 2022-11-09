@@ -54,8 +54,8 @@ extern int lineno; /* source line number for listing */
 /**************************************************/
 
 typedef enum {Statement, Expression, Id, Type} NodeKind;
-typedef enum {If, Assign} StatementKind;
-typedef enum {Operator, Constant} ExpressionKind;
+typedef enum {If, Assign, While} StatementKind;
+typedef enum {Operator, Constant, Return} ExpressionKind;
 typedef enum {Variable, Array, Function} IdKind;
 typedef enum {Void, Int} TypeKind;
 

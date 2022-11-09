@@ -106,7 +106,7 @@ TreeNode *newIdNode(IdKind kind)
       t->child[i] = NULL;
     t->sibling = NULL;
     t->nodekind = Id;
-    t->kind.type = kind;
+    t->kind.id = kind;
     t->lineno = lineno;
   }
   return t;
@@ -188,6 +188,9 @@ void printTree(TreeNode *tree)
         case Assign:
           fprintf(listing, "Assign to: %s\n", tree->attr.name);
           break;
+        case While:
+          fprintf(listing, "While\n");
+          break;
         default:
           fprintf(listing, "Unknown StatementNode kind\n");
           break;
@@ -203,6 +206,9 @@ void printTree(TreeNode *tree)
           break;
         case Constant:
           fprintf(listing, "Const: %d\n", tree->attr.val);
+          break;
+        case Return:
+          fprintf(listing, "Return: \n");
           break;
         default:
           fprintf(listing, "Unknown ExpressionNode kind\n");
