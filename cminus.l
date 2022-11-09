@@ -6,10 +6,27 @@
 char tokenString[MAXTOKENLEN + 1];
 
 /* lexeme of the last ID token */
-char idName[MAXTOKENLEN + 1];
+char idLexeme[MAXTOKENLEN + 1];
 
 /* lexeme of the last NUM token */
 int numValue;
+
+/* stores the lexeme of ID tokens */
+char* savedId[128];
+int savedIdIndex = -1;
+
+void saveId(char *id) {
+  savedId[++savedIdIndex] = copyString(id);
+}
+
+char *popId() {
+  if (savedIdIndex < 0) {
+    return "";
+  }
+  
+  return savedId[savedIdIndex--];
+}
+
 %}
 
 digit       [0-9]
@@ -91,7 +108,8 @@ TokenType getToken(void) {
   strncpy(tokenString, yytext, MAXTOKENLEN);
   switch(currentToken) {
     case ID:
-      strncpy(idName, yytext, MAXTOKENLEN);
+      strncpy(idLexeme, yytext, MAXTOKENLEN);
+      saveId(idLexeme);
       break;
     case NUM:
       numValue = atoi(tokenString);

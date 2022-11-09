@@ -7,7 +7,6 @@
 #include "parse.h"
 
 #define YYSTYPE TreeNode*
-static char * savedName; /* for use in assignments */
 static int savedLineNo;  /* ditto */
 static TreeNode * savedTree; /* stores syntax tree for later return */
 static int yylex(void);
@@ -58,12 +57,12 @@ declaracao          : var_declaracao { $$ = $1; }
 var_declaracao      : tipo_especificador ID SEMICOLON {
                       $$ = $1;
                       $$->child[0] = newIdNode(Variable);
-                      $$->child[0]->attr.name = copyString(idName);
+                      $$->child[0]->attr.name = copyString(popId());
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
                       $$ = $1;
                       $$->child[0] = newIdNode(Array);
-                      $$->child[0]->attr.name = copyString(idName);
+                      $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->child[0] = newExpNode(Constant);
                       $$->child[0]->child[0]->attr.val = numValue;
                     }
@@ -71,15 +70,12 @@ var_declaracao      : tipo_especificador ID SEMICOLON {
 tipo_especificador  : INT { $$ = newTypeNode(Int); }
                     | VOID { $$ = newTypeNode(Void); }
                     ;
-fun_declaracao      : tipo_especificador ID { 
-                      savedName = copyString(idName);
-                    }
-                      LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
+fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
                       $$ = $1;
                       $$->child[0] = newIdNode(Function);
-                      $$->child[0]->attr.name = copyString(savedName);
-                      $$->child[0]->child[0] = $5;
-                      $$->child[0]->child[1] = $7;
+                      $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->child[0] = $4;
+                      $$->child[0]->child[1] = $6;
                     }
                     ;
 params              : param_lista { $$ = $1; }
@@ -101,12 +97,12 @@ param_lista         : param_lista COMMA param {
 param               : tipo_especificador ID { 
                       $$ = $1;
                       $$->child[0] = newIdNode(Variable);
-                      $$->child[0]->attr.name = copyString(idName);
+                      $$->child[0]->attr.name = copyString(popId());
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET {
                       $$ = $1;
                       $$->child[0] = newIdNode(Array);
-                      $$->child[0]->attr.name = copyString(idName);
+                      $$->child[0]->attr.name = copyString(popId());
                     }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
@@ -193,13 +189,11 @@ expressao           : var ASSIGN expressao {
                     ;
 var                 : ID { 
                       $$ = newIdNode(Variable);
-                      $$->attr.name = copyString(idName);
+                      $$->attr.name = copyString(popId());
                     }
-                    | ID {
-                      savedName = copyString(idName);
-                    } LEFT_SQUARE_BRACKET expressao RIGHT_SQUARE_BRACKET { 
+                    | ID LEFT_SQUARE_BRACKET expressao RIGHT_SQUARE_BRACKET { 
                       $$ = newIdNode(Array);
-                      $$->attr.name = copyString(idName);
+                      $$->attr.name = copyString(popId());
                       $$->child[0] = $3;
                     }
                     ;
@@ -276,13 +270,10 @@ fator               : LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS { $$ = $2; }
                       $$->type = IntegerType;
                     }
                     ;
-ativacao            : ID {
-                      savedName = copyString(idName);
-                    }
-                      LEFT_PARENTHESIS args RIGHT_PARENTHESIS { 
+ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS { 
                       $$ = newIdNode(Function);
-                      $$->attr.name = copyString(savedName);
-                      $$->child[0] = $4;
+                      $$->attr.name = copyString(popId()); 
+                      $$->child[0] = $3;
                     }
                     ;
 args                : arg_lista { $$ = $1; }

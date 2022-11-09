@@ -8,10 +8,15 @@
 extern char tokenString[MAXTOKENLEN + 1];
 
 /* Stores the name of the last ID */
-extern char idName[MAXTOKENLEN + 1];
+extern char idLexeme[MAXTOKENLEN + 1];
 
 /* Stores the value of the last NUM */
 extern int numValue;
+
+/* stores the lexeme of ID tokens */
+extern char *savedId[128];
+extern int savedIdIndex;
+extern char *popId();
 
 /* Returns the 
  * next token in source file
