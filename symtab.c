@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "symtab.h"
+#include "scopetree.h"
 
 /* SIZE is the size of the hash table */
 #define SIZE 211
@@ -11,102 +12,118 @@
 #define SHIFT 4
 
 /* the hash function */
-static int hash ( char * key )
-{ int temp = 0;
+static int hash(char *key)
+{
+  int temp = 0;
   int i = 0;
   while (key[i] != '\0')
-  { temp = ((temp << SHIFT) + key[i]) % SIZE;
+  {
+    temp = ((temp << SHIFT) + key[i]) % SIZE;
     ++i;
   }
   return temp;
 }
 
-/* the list of line numbers of the source 
- * code in which a variable is referenced
- */
-typedef struct LineListRec
-   { int lineno;
-     struct LineListRec * next;
-   } * LineList;
-
-/* The record in the bucket lists for
- * each variable, including name, 
- * assigned memory location, and
- * the list of line numbers in which
- * it appears in the source code
- */
-typedef struct BucketListRec
-   { char * name;
-     LineList lines;
-     int memloc ; /* memory location for variable */
-     struct BucketListRec * next;
-   } * BucketList;
-
 /* the hash table */
 static BucketList hashTable[SIZE];
 
-/* Procedure st_insert inserts line numbers and
+/* Procedure symbolTableInsert inserts line numbers and
  * memory locations into the symbol table
  * loc = memory location is inserted only the
  * first time, otherwise ignored
- */
-void st_insert( char * name, int lineno, int loc )
-{ int h = hash(name);
-  BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
+ */ // todo: must review this method
+void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int currScope, int lineno, ScopeNode* currScopeNode)
+{
+  int h = hash(name);
+  BucketList l = hashTable[h];
+  ScopeList sl = (ScopeList)malloc(sizeof(struct scopeList));
+  sl->scope = currScope;
+  sl->next = NULL;
+  while (l != NULL) {
+    if (strcmp(name, l->id) == 0) {
+      if (isInsideScope(currScopeNode, sl)) {
+        /* update the scope list of the found variable */
+        ScopeList s = l->scopes;
+        while (s->next != NULL)
+          s = s->next;
+        s->next = (ScopeList)malloc(sizeof(struct scopeList));
+        s->next->scope = currScope;
+        s->next->next = NULL;
+        /* update the line list of the found variable */
+        LineList t = l->lines;
+        while (t->next != NULL)
+          t = t->next;
+        t->next = (LineList)malloc(sizeof(struct LineList));
+        t->next->lineno = lineno;
+        t->next->next = NULL;
+      }
+    }
     l = l->next;
-  if (l == NULL) /* variable not yet in table */
-  { l = (BucketList) malloc(sizeof(struct BucketListRec));
-    l->name = name;
-    l->lines = (LineList) malloc(sizeof(struct LineListRec));
-    l->lines->lineno = lineno;
-    l->memloc = loc;
-    l->lines->next = NULL;
-    l->next = hashTable[h];
-    hashTable[h] = l; }
-  else /* found in table, so just add line number */
-  { LineList t = l->lines;
-    while (t->next != NULL) t = t->next;
-    t->next = (LineList) malloc(sizeof(struct LineListRec));
-    t->next->lineno = lineno;
-    t->next->next = NULL;
   }
-} /* st_insert */
+  /* the variable was not found in currScope, so create a new one */
+  l = (BucketList)malloc(sizeof(struct BucketList));
+  l->id = name;
+  l->idkind = idkind;
+  l->typekind = typekind;
+  l->scopes = (ScopeList)malloc(sizeof(struct scopeList));
+  l->scopes->scope = currScope;
+  l->scopes->next = NULL;
+  l->lines = (LineList)malloc(sizeof(struct LineList));
+  l->lines->lineno = lineno;
+  l->lines->next = NULL;
+  l->next = NULL;
+  hashTable[h] = l;
 
-/* Function st_lookup returns the memory 
- * location of a variable or -1 if not found
- */
-int st_lookup ( char * name )
-{ int h = hash(name);
-  BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) return -1;
-  else return l->memloc;
+  free(sl);
 }
 
-/* Procedure printSymTab prints a formatted 
- * listing of the symbol table contents 
+/* Function symbolTableLookup returns a pointer to the
+ * existing variable in the lookup table or a null pointer 
+ * if the variable was not found.
+ */
+BucketList symbolTableLookup(char *name, int scope)
+{
+  int h = hash(name);
+  BucketList l = hashTable[h];
+  while (l != NULL) {
+    if (strcmp(name, l->id) == 0) {
+      for (ScopeList s = l->scopes; s != NULL; s = s->next) {
+        if (s->scope == scope)
+          /* found variable in scope */
+          return l;
+      }
+    }
+    l = l->next;
+  }
+  return NULL;
+}
+
+/* Procedure printSymbolTable prints a formatted
+ * listing of the symbol table contents
  * to the listing file
  */
-void printSymTab(FILE * listing)
-{ int i;
-  fprintf(listing,"Variable Name  Location   Line Numbers\n");
-  fprintf(listing,"-------------  --------   ------------\n");
-  for (i=0;i<SIZE;++i)
-  { if (hashTable[i] != NULL)
-    { BucketList l = hashTable[i];
+void printSymbolTable(FILE *listing)
+{
+  int i;
+  fprintf(listing, "Id\t\tTypeKind\t\tIdKind\t\tScopes\t\tLine Numbers\n");
+  fprintf(listing, "--\t\t--------\t\t------\t\t------\t\t------------\n");
+  for (i = 0; i < SIZE; ++i)
+  {
+    if (hashTable[i] != NULL)
+    {
+      BucketList l = hashTable[i];
       while (l != NULL)
-      { LineList t = l->lines;
-        fprintf(listing,"%-14s ",l->name);
-        fprintf(listing,"%-8d  ",l->memloc);
+      {
+        LineList t = l->lines;
+        fprintf(listing, "%-14s ", l->id);
         while (t != NULL)
-        { fprintf(listing,"%4d ",t->lineno);
+        {
+          fprintf(listing, "%4d ", t->lineno);
           t = t->next;
         }
-        fprintf(listing,"\n");
+        fprintf(listing, "\n");
         l = l->next;
       }
     }
   }
-} /* printSymTab */
+}

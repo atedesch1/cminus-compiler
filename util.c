@@ -62,6 +62,7 @@ TreeNode *newStmtNode(StatementKind kind)
       for (i = 0; i < MAXCHILDREN; i++)
         t->child[i] = NULL;
       t->sibling = NULL;
+      t->parent = NULL;
       t->nodekind = Statement;
       t->kind.stmt = kind;
       t->lineno = lineno;
@@ -83,6 +84,7 @@ TreeNode *newExpNode(ExpressionKind kind)
       for (i = 0; i < MAXCHILDREN; i++)
         t->child[i] = NULL;
       t->sibling = NULL;
+      t->parent = NULL;
       t->nodekind = Expression;
       t->kind.exp = kind;
       t->lineno = lineno;
@@ -105,6 +107,7 @@ TreeNode *newIdNode(IdKind kind)
     for (i = 0; i < MAXCHILDREN; i++)
       t->child[i] = NULL;
     t->sibling = NULL;
+    t->parent = NULL;
     t->nodekind = Id;
     t->kind.id = kind;
     t->lineno = lineno;
@@ -126,6 +129,7 @@ TreeNode *newTypeNode(TypeKind kind)
       for (i = 0; i < MAXCHILDREN; i++)
         t->child[i] = NULL;
       t->sibling = NULL;
+      t->parent = NULL;
       t->nodekind = Type;
       t->kind.type = kind;
       t->lineno = lineno;

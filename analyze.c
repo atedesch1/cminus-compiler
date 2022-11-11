@@ -41,32 +41,27 @@ static void insertNode( TreeNode * t)
 { switch (t->nodekind)
   { case Statement:
       switch (t->kind.stmt)
-      { case Assign: /* dummy instruction */
-        case While: /* dummy instruction */
-        case If: /* dummy instruction */
-          if (st_lookup(t->attr.name) == -1)
-          /* not yet in table, so treat as new definition */
-            st_insert(t->attr.name,t->lineno,location++);
-          else
-          /* already in table, so ignore location, 
-             add line number of use only */ 
-            st_insert(t->attr.name,t->lineno,0);
-          break;
+      { case Assign:
+        case While:
+        case If:
         default:
           break;
       }
       break;
     case Expression:
       switch (t->kind.exp)
-      { case Return: /* dummy instruction */
-          if (st_lookup(t->attr.name) == -1)
-          /* not yet in table, so treat as new definition */
-            st_insert(t->attr.name,t->lineno,location++);
-          else
-          /* already in table, so ignore location, 
-             add line number of use only */ 
-            st_insert(t->attr.name,t->lineno,0);
+      { case Return:
+        case Constant:
+        case Operator:
+        default:
           break;
+      }
+      break;
+    case Id:
+      switch (t->kind.id)
+      { case Variable:
+        case Array:
+        case Function:
         default:
           break;
       }
@@ -83,12 +78,17 @@ void buildSymtab(TreeNode * syntaxTree)
 { traverse(syntaxTree,insertNode,nullProc);
   if (TraceAnalyze)
   { fprintf(listing,"\nSymbol table:\n\n");
-    printSymTab(listing);
+    printSymbolTable(listing);
   }
 }
 
-static void typeError(TreeNode * t, char * message)
-{ fprintf(listing,"Type error at line %d: %s\n",t->lineno,message);
+static void typeError(TreeNode * t, char * message) { 
+  fprintf(listing,"Type error at line %d: %s\n",t->lineno,message);
+  Error = TRUE;
+}
+
+static void declarationError(TreeNode *t, char *message) {
+  fprintf(listing, "Declaration error at line %d: %s\n", t->lineno, message);
   Error = TRUE;
 }
 
