@@ -69,7 +69,16 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
   l->lines->lineno = lineno;
   l->lines->next = NULL;
   l->next = NULL;
-  hashTable[h] = l;
+
+  BucketList tail = hashTable[h];
+  if (tail == NULL) {
+    hashTable[h] = l;
+  }
+  else {
+    while (tail->next != NULL)
+      tail = tail->next;
+    tail->next = l;
+  }
 }
 
 /* Function symbolTableLookup returns a pointer to the

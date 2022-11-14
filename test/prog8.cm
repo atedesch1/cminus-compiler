@@ -5,5 +5,5 @@ void f(void) {
 int y;
 
 void main(void) {
-   int a;
+   int x;
 }

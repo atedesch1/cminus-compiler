@@ -62,7 +62,7 @@ ScopeNode *insertScope(ScopeNode *currNode, int lastScope)
 
 bool isInsideScope(ScopeNode *node, ScopeList scopes)
 {
-  while (node != NULL)
+  while (node != NULL) // maybe node->parent ?
   {
     for (ScopeList s = scopes; s != NULL; s = s->next)
     {
