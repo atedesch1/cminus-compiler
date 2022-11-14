@@ -1,0 +1,11 @@
+int y;
+
+void f(void) {
+   int x[10];
+}
+
+void z[5];
+
+void main(void) {
+   int x;
+}

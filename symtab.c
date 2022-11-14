@@ -137,7 +137,7 @@ void printSymbolTable(FILE *listing)
             fprintf(listing, "Variable\t");
             break;
           case Array:
-            fprintf(listing, "Array\t");
+            fprintf(listing, "Array\t\t");
             break;
           case Function:
             fprintf(listing, "Function\t");

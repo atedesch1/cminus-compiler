@@ -36,7 +36,7 @@ static void nullProc(TreeNode * t)
  */
 static void declarationError(TreeNode *t, char *message, char *variableName)
 {
-  fprintf(listing, "Declaration error of variable %s at line %d: %s\n", variableName, t->lineno, message);
+  fprintf(listing, "Declaration error of %s at line %d: %s\n", variableName, t->lineno, message);
   Error = TRUE;
 }
 
@@ -64,6 +64,7 @@ static void insertNode( TreeNode * t)
       switch (t->kind.id)
       { 
         case Variable:
+        case Array:
           /* t->parent returns NULL for some reason... check this later */
           if (t->parent != NULL) 
           {
@@ -104,7 +105,6 @@ static void insertNode( TreeNode * t)
             }
           }
           break;
-        case Array:
         case Function:
         default:
           break;
