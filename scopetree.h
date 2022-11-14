@@ -21,7 +21,7 @@ typedef struct scopeNode
   int numChildren;
 } ScopeNode;
 
-ScopeNode *newRootScope();
+ScopeNode *newRootScopeNode();
 
 ScopeNode *newScopeNode(int scope);
 

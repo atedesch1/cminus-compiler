@@ -103,6 +103,9 @@ TokenType getToken(void) {
     lineno++;
     yyin = source;
     yyout = listing;
+    scopeTree = newRootScopeNode();
+    currentScope = scopeTree;
+    maxScope = -1;
   }
   currentToken = yylex();
   strncpy(tokenString, yytext, MAXTOKENLEN);
@@ -114,11 +117,29 @@ TokenType getToken(void) {
     case NUM:
       numValue = atoi(tokenString);
       break;
+    case LEFT_CURLY_BRACKET:
+      currentScope = insertScope(currentScope, maxScope);
+      ++maxScope;
+      break;
+    case RIGHT_CURLY_BRACKET:
+      currentScope = currentScope->parent;
+      break;
     default:
       break;
   }
   if (TraceScan) {
     fprintf(listing,"\t%d: ", lineno);
+
+    /* DEBUG PURPOSES. SHOULD REMOVE LATER. */ 
+    switch(currentToken) {
+      case LEFT_CURLY_BRACKET:
+      case RIGHT_CURLY_BRACKET:
+        fprintf(listing,"\tCurrent scope:%d\n", currentScope->scope);
+        break;
+      default:
+        break;
+    }
+    /* DEBUG PURPOSES. SHOULD REMOVE LATER. */
     printToken(currentToken, tokenString);
   }
   return currentToken;

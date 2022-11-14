@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "scopetree.h"
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
 #define NO_PARSE FALSE
@@ -25,6 +26,9 @@
 
 /* allocate global variables */
 int lineno = 0;
+int maxScope;
+ScopeNode *scopeTree;
+ScopeNode *currentScope;
 FILE *source;
 FILE *listing;
 FILE *code;
