@@ -85,16 +85,14 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
  * existing variable in the lookup table or a null pointer 
  * if the variable was not found.
  */
-BucketList symbolTableLookup(char *name, int scope)
+BucketList symbolTableLookup(char *name, ScopeNode* currScopeNode)
 {
   int h = hash(name);
   BucketList l = hashTable[h];
   while (l != NULL) {
     if (strcmp(name, l->id) == 0) {
-      for (ScopeList s = l->scopes; s != NULL; s = s->next) {
-        if (s->scope == scope)
-          /* found variable in scope */
-          return l;
+      if (isInsideScope(currScopeNode, l->scopes)) {
+        return l;        
       }
     }
     l = l->next;

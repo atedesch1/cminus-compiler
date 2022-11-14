@@ -1,0 +1,9 @@
+int y;
+
+void f(void) {
+   int x;
+}
+
+void main(void) {
+   int x;
+}

@@ -78,15 +78,11 @@ static void insertNode( TreeNode * t)
                     break;
                   case Int:
                     /* Check for double declaration in the scope */
-                    if (symbolTableLookup(t->attr.name, t->scopeNode->scope) != NULL) {
-                      printf("(NULL DIFF) Token: %s ; Line: %d\n", t->attr.name, t->lineno);
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) != NULL)
                       declarationError(t, "redeclaration of variables is not allowed.", t->attr.name);
-                    }
-                    else {
+                    else
                       /* Then, we add the new symbol in the table */
-                      printf("(NULL) Token: %s ; Line: %d\n", t->attr.name, t->lineno);
                       symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
-                    }
                     break;
                   default:
                     break;

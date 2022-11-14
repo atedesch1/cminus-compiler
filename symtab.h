@@ -40,7 +40,7 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
  * existing variable in the lookup table or a null pointer
  * if the variable was not found.
  */
-BucketList symbolTableLookup(char *name, int scope);
+BucketList symbolTableLookup(char *name, ScopeNode* currScopeNode);
 
 /* Procedure printSymbolTable prints a formatted 
  * listing of the symbol table contents 
