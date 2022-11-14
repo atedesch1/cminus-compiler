@@ -32,22 +32,19 @@ static BucketList hashTable[SIZE];
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */ // todo: must review this method
-void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int currScope, int lineno, ScopeNode* currScopeNode)
+void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno, ScopeNode* currScopeNode)
 {
   int h = hash(name);
   BucketList l = hashTable[h];
-  ScopeList sl = (ScopeList)malloc(sizeof(struct scopeList));
-  sl->scope = currScope;
-  sl->next = NULL;
   while (l != NULL) {
     if (strcmp(name, l->id) == 0) {
-      if (isInsideScope(currScopeNode, sl)) {
+      if (isInsideScope(currScopeNode, l->scopes)) {
         /* update the scope list of the found variable */
         ScopeList s = l->scopes;
         while (s->next != NULL)
           s = s->next;
         s->next = (ScopeList)malloc(sizeof(struct scopeList));
-        s->next->scope = currScope;
+        s->next->scope = currScopeNode->scope;
         s->next->next = NULL;
         /* update the line list of the found variable */
         LineList t = l->lines;
@@ -66,15 +63,13 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int currSco
   l->idkind = idkind;
   l->typekind = typekind;
   l->scopes = (ScopeList)malloc(sizeof(struct scopeList));
-  l->scopes->scope = currScope;
+  l->scopes->scope = currScopeNode->scope;
   l->scopes->next = NULL;
   l->lines = (LineList)malloc(sizeof(struct LineList));
   l->lines->lineno = lineno;
   l->lines->next = NULL;
   l->next = NULL;
   hashTable[h] = l;
-
-  free(sl);
 }
 
 /* Function symbolTableLookup returns a pointer to the
@@ -106,7 +101,7 @@ void printSymbolTable(FILE *listing)
 {
   int i;
   fprintf(listing, "Id\t\tTypeKind\t\tIdKind\t\tScopes\t\tLine Numbers\n");
-  fprintf(listing, "--\t\t--------\t\t------\t\t------\t\t------------\n");
+  fprintf(listing, "----\t\t--------\t\t------\t\t------\t\t------------\n");
   for (i = 0; i < SIZE; ++i)
   {
     if (hashTable[i] != NULL)
@@ -115,10 +110,46 @@ void printSymbolTable(FILE *listing)
       while (l != NULL)
       {
         LineList t = l->lines;
-        fprintf(listing, "%-14s ", l->id);
+        fprintf(listing, "%-14s\t", l->id);
+        
+        switch(l->typekind) 
+        {
+          case Void:
+            fprintf(listing, "Void\t\t\t");
+            break;
+          case Int:
+            fprintf(listing, "Int\t\t\t");
+            break;
+          default:
+            break;
+        }
+        
+        switch(l->idkind) 
+        {
+          case Variable:
+            fprintf(listing, "Variable\t");
+            break;
+          case Array:
+            fprintf(listing, "Array\t");
+            break;
+          case Function:
+            fprintf(listing, "Function\t");
+            break;
+          default:
+            break;
+        }
+
+        ScopeList s = l->scopes;
+        while (s != NULL) 
+        {
+          fprintf(listing, "%d\t", s->scope);
+          s = s->next;
+        }
+        fprintf(listing, "\t");
+
         while (t != NULL)
         {
-          fprintf(listing, "%4d ", t->lineno);
+          fprintf(listing, "%d\t", t->lineno);
           t = t->next;
         }
         fprintf(listing, "\n");

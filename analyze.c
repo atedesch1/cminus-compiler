@@ -2,9 +2,6 @@
 #include "symtab.h"
 #include "analyze.h"
 
-/* counter for variable memory locations */
-static int location = 0;
-
 /* Procedure traverse is a generic recursive 
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc 
@@ -37,6 +34,12 @@ static void nullProc(TreeNode * t)
  * identifiers stored in t into 
  * the symbol table 
  */
+static void declarationError(TreeNode *t, char *message, char *variableName)
+{
+  fprintf(listing, "Declaration error of variable %s at line %d: %s\n", variableName, t->lineno, message);
+  Error = TRUE;
+}
+
 static void insertNode( TreeNode * t)
 { switch (t->nodekind)
   { case Statement:
@@ -59,7 +62,48 @@ static void insertNode( TreeNode * t)
       break;
     case Id:
       switch (t->kind.id)
-      { case Variable:
+      { 
+        case Variable:
+          /* t->parent returns NULL for some reason... check this later */
+          if (t->parent != NULL) 
+          {
+            switch(t->parent->nodekind) 
+            {
+              case Type:
+                switch(t->parent->kind.id) 
+                {
+                  case Void:
+                    /* Variable of type void is not allowed */
+                    declarationError(t, "void type for variables is not allowed.", t->attr.name);
+                    break;
+                  case Int:
+                    /* Check for double declaration in the scope */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode->scope) != NULL)
+                      declarationError(t, "redeclaration of variables is not allowed.", t->attr.name);
+                    else
+                      /* Then, we add the new symbol in the table */
+                      symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
+                    break;
+                  default:
+                    break;
+                }
+                break;
+              case Expression:
+                switch(t->parent->kind.id)
+                {
+                  case Operator:
+                  case Return:
+                    /* Check if variable was declared previously in the scope */
+                    break;
+                  default:
+                    break;
+                }
+                break;
+              default:
+                break;
+            }
+          }
+          break;
         case Array:
         case Function:
         default:
@@ -75,20 +119,16 @@ static void insertNode( TreeNode * t)
  * table by preorder traversal of the syntax tree
  */
 void buildSymtab(TreeNode * syntaxTree)
-{ traverse(syntaxTree,insertNode,nullProc);
-  if (TraceAnalyze)
-  { fprintf(listing,"\nSymbol table:\n\n");
+{ 
+  traverse(syntaxTree, insertNode, nullProc);
+  if (TraceAnalyze) { 
+    fprintf(listing, "\nSymbol table:\n\n");
     printSymbolTable(listing);
   }
 }
 
 static void typeError(TreeNode * t, char * message) { 
   fprintf(listing,"Type error at line %d: %s\n",t->lineno,message);
-  Error = TRUE;
-}
-
-static void declarationError(TreeNode *t, char *message) {
-  fprintf(listing, "Declaration error at line %d: %s\n", t->lineno, message);
   Error = TRUE;
 }
 

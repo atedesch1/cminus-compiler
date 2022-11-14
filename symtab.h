@@ -34,7 +34,7 @@ typedef struct BucketList
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int currScope, int lineno, ScopeNode *currScopeNode);
+void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno, ScopeNode *currScopeNode);
 
 /* Function symbolTableLookup returns a pointer to the
  * existing variable in the lookup table or a null pointer

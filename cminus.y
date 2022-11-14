@@ -209,6 +209,8 @@ simples_expressao   : soma_expressao relacional soma_expressao {
                       $$ = $2;
                       $$->child[0] = $1;
                       $$->child[1] = $3;
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                     }
                     | soma_expressao { $$ = $1; }
                     ;
@@ -241,6 +243,8 @@ soma_expressao      : soma_expressao soma termo {
                       $$ = $2;
                       $$->child[0] = $1;
                       $$->child[1] = $3;
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                     }
                     | termo { $$ = $1; }
                     ;
@@ -257,6 +261,8 @@ termo               : termo mult fator {
                       $$ = $2;
                       $$->child[0] = $1;
                       $$->child[1] = $3;
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                     }
                     | fator { $$ = $1; }
                     ;
@@ -284,6 +290,7 @@ ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS {
                       $$->lineno = lineno;
                       $$->child[0] = $3;
                       $$->scopeNode = currentScope;
+                      $$->parent = $1;
                     }
                     ;
 args                : arg_lista { $$ = $1; }
