@@ -131,14 +131,14 @@ TokenType getToken(void) {
     fprintf(listing,"\t%d: ", lineno);
 
     /* DEBUG PURPOSES. SHOULD REMOVE LATER. */ 
-    switch(currentToken) {
+    /* switch(currentToken) {
       case LEFT_CURLY_BRACKET:
       case RIGHT_CURLY_BRACKET:
         fprintf(listing,"\tCurrent scope:%d\n", currentScope->scope);
         break;
       default:
         break;
-    }
+    } */
     /* DEBUG PURPOSES. SHOULD REMOVE LATER. */
     printToken(currentToken, tokenString);
   }

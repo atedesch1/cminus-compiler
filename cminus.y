@@ -47,6 +47,7 @@ var_declaracao      : tipo_especificador ID SEMICOLON {
                       $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
+                      $$->child[0]->scopeNode = currentScope;
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
                       $$ = $1;
@@ -56,6 +57,7 @@ var_declaracao      : tipo_especificador ID SEMICOLON {
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->child[0] = newExpNode(Constant);
                       $$->child[0]->child[0]->attr.val = numValue;
+                      $$->child[0]->scopeNode = currentScope;
                     }
                     ;
 tipo_especificador  : INT { $$ = newTypeNode(Int); }
@@ -67,6 +69,7 @@ fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENT
                       $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
+                      $$->child[0]->scopeNode = currentScope;
                       $$->child[0]->child[0] = $4;
                       $$->child[0]->child[1] = $6;
                     }
@@ -93,6 +96,7 @@ param               : tipo_especificador ID {
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
+                      /* TODO: we need to add a scope to the function's param */
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET {
                       $$ = $1;
@@ -100,6 +104,7 @@ param               : tipo_especificador ID {
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
+                      /* TODO: we need to add a scope to the function's param */
                     }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
@@ -190,12 +195,14 @@ var                 : ID {
                       $$ = newIdNode(Variable);
                       $$->attr.name = copyString(popId());
                       $$->lineno = lineno;
+                      $$->scopeNode = currentScope;
                     }
                     | ID LEFT_SQUARE_BRACKET expressao RIGHT_SQUARE_BRACKET { 
                       $$ = newIdNode(Array);
                       $$->attr.name = copyString(popId());
                       $$->lineno = lineno;
                       $$->child[0] = $3;
+                      $$->scopeNode = currentScope;
                     }
                     ;
 simples_expressao   : soma_expressao relacional soma_expressao { 
@@ -276,6 +283,7 @@ ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS {
                       $$->attr.name = copyString(popId()); 
                       $$->lineno = lineno;
                       $$->child[0] = $3;
+                      $$->scopeNode = currentScope;
                     }
                     ;
 args                : arg_lista { $$ = $1; }

@@ -69,17 +69,19 @@ typedef enum {VoidType, IntegerType, BooleanType} ExpType;
 #define MAXCHILDREN 3
 
 typedef struct treeNode
-   { struct treeNode * child[MAXCHILDREN];
-     struct treeNode * sibling;
-     struct treeNode * parent;
-     int lineno;
-     NodeKind nodekind;
-     union { StatementKind stmt; ExpressionKind exp; IdKind id; TypeKind type; } kind;
-     union { TokenType op;
-             int val;
-             char * name; } attr;
-      ExpType type; /* for type checking of exps */
-   } TreeNode;
+{ 
+   struct treeNode * child[MAXCHILDREN];
+   struct treeNode * sibling;
+   struct treeNode * parent;
+   int lineno;
+   ScopeNode *scopeNode;
+   NodeKind nodekind;
+   union { StatementKind stmt; ExpressionKind exp; IdKind id; TypeKind type; } kind;
+   union { TokenType op;
+           int val;
+           char * name; } attr;
+   ExpType type; /* for type checking of exps */   
+} TreeNode;
 
 /**************************************************/
 /***********   Flags for tracing       ************/

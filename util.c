@@ -225,12 +225,18 @@ void printTree(TreeNode *tree)
         {
         case Variable:
           fprintf(listing, "VariableId: %s\n", tree->attr.name);
+          if (tree->scopeNode != NULL)
+            fprintf(listing, "VaribleScope: %d\n", tree->scopeNode->scope);
           break;
         case Array:
           fprintf(listing, "ArrayId: %s\n", tree->attr.name);
+          if (tree->scopeNode != NULL)
+            fprintf(listing, "ArrayScope: %d\n", tree->scopeNode->scope);
           break;
         case Function:
           fprintf(listing, "FunctionId: %s\n", tree->attr.name);
+          if (tree->scopeNode != NULL)
+            fprintf(listing, "FunctionScope: %d\n", tree->scopeNode->scope);
           break;
         default:
           fprintf(listing, "Unknown IdNode kind\n");
