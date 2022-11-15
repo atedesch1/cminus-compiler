@@ -1,5 +1,9 @@
 int input(void) { }
 
+int gdc(int u, int v) { 
+   int z;
+}
+
 void main(void)
 {
    int x;

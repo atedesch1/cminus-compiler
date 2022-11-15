@@ -69,9 +69,9 @@ fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENT
                       $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
-                      $$->child[0]->scopeNode = currentScope;
                       $$->child[0]->child[0] = $4;
                       $$->child[0]->child[1] = $6;
+                      $$->child[0]->scopeNode = scopeTree; /* all functions are global */
                     }
                     ;
 params              : param_lista { $$ = $1; }
@@ -96,6 +96,7 @@ param               : tipo_especificador ID {
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->scopeNode = currentScope;
                       /* TODO: we need to add a scope to the function's param */
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET {
@@ -104,6 +105,7 @@ param               : tipo_especificador ID {
                       $$->child[0]->parent = $$;
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->scopeNode = currentScope;
                       /* TODO: we need to add a scope to the function's param */
                     }
                     ;
