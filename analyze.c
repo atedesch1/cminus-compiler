@@ -99,13 +99,30 @@ static void insertNode( TreeNode * t)
                 switch(t->parent->kind.id)
                 {
                   case Operator:
+                    /* Check if variable was defined */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+                      usageError(t, "implicit declaration is not allowed.", t->attr.name);
+                    break;
                   case Return:
                     /* Check if variable was declared previously in the scope */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+                      usageError(t, "implicit declaration is not allowed.", t->attr.name);
                     break;
                   default:
                     break;
                 }
                 break;
+              case Statement:
+                switch(t->parent->kind.id)
+                {
+                  case Assign:
+                    /* Check if variable was defined */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+                      usageError(t, "implicit declaration is not allowed.", t->attr.name);
+                    break;
+                  default:
+                    break;
+                }
               default:
                 break;
             }
