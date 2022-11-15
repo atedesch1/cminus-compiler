@@ -36,7 +36,7 @@ static void nullProc(TreeNode * t)
  */
 static void declarationError(TreeNode *t, char *message, char *variableName)
 {
-  fprintf(listing, "Declaration error of %s at line %d: %s\n", variableName, t->lineno, message);
+  fprintf(listing, "ERROR: declaration of %s at line %d: %s\n", variableName, t->lineno, message);
   Error = TRUE;
 }
 
@@ -82,7 +82,7 @@ static void insertNode( TreeNode * t)
                     if (symbolTableLookup(t->attr.name, t->scopeNode) != NULL)
                       declarationError(t, "redeclaration of variables is not allowed.", t->attr.name);
                     else
-                      /* Then, we add the new symbol in the table */
+                      /* Otherwise, we add the new symbol in the table (or just a use of it) */
                       symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
                     break;
                   default:
@@ -106,6 +106,28 @@ static void insertNode( TreeNode * t)
           }
           break;
         case Function:
+          if (t->parent != NULL) {
+            switch(t->parent->nodekind)
+            {
+              case Type:
+                switch(t->parent->kind.id) 
+                {
+                  case Void:
+                  case Int:
+                    /* Check for double declaration in the scope */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) != NULL)
+                      declarationError(t, "redeclaration of functions is not allowed.", t->attr.name);
+                    else
+                      /* Otherwise, we add the new symbol in the table (or just a call of it) */
+                      symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
+                    break;
+                  default:
+                    break;
+                }
+              default:
+                break;
+            }
+          }
         default:
           break;
       }
@@ -183,3 +205,14 @@ static void checkNode(TreeNode * t)
  * by a postorder syntax tree traversal
  */
 void typeCheck(TreeNode * syntaxTree) { traverse(syntaxTree,nullProc,checkNode); }
+
+/* Procedure mainCheck verifies if
+ * a function called main is present
+ * in a cminus program.
+ */
+void mainCheck() {
+  if (symbolTableLookup("main", scopeTree) == NULL) {
+    fprintf(listing, "ERROR: no main function was found.\n");
+    Error = TRUE;
+  }
+}

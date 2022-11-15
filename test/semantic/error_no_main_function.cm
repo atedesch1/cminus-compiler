@@ -1,0 +1,7 @@
+void f(void) {
+   int x;
+}
+
+void z(void) {
+   int x;
+}

@@ -11,4 +11,10 @@ void buildSymtab(TreeNode *);
  */
 void typeCheck(TreeNode *);
 
+/* Procedure mainCheck verifies if
+ * a function called main is present
+ * in a cminus program.
+ */
+void mainCheck();
+
 #endif
