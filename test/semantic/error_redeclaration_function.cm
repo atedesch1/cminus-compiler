@@ -1,0 +1,10 @@
+int xyz(void) { }
+
+int f;
+
+void f(void) { }
+
+void main(void)
+{
+    int xyz;
+}

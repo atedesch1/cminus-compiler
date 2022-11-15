@@ -80,7 +80,7 @@ static void insertNode( TreeNode * t)
                   case Int:
                     /* Check for double declaration in the scope */
                     if (symbolTableLookup(t->attr.name, t->scopeNode) != NULL)
-                      declarationError(t, "redeclaration of variables is not allowed.", t->attr.name);
+                      declarationError(t, "redeclaration of variables or functions is not allowed.", t->attr.name);
                     else
                       /* Otherwise, we add the new symbol in the table (or just a use of it) */
                       symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
@@ -116,7 +116,7 @@ static void insertNode( TreeNode * t)
                   case Int:
                     /* Check for double declaration in the scope */
                     if (symbolTableLookup(t->attr.name, t->scopeNode) != NULL)
-                      declarationError(t, "redeclaration of functions is not allowed.", t->attr.name);
+                      declarationError(t, "redeclaration of variables or functions is not allowed.", t->attr.name);
                     else
                       /* Otherwise, we add the new symbol in the table (or just a call of it) */
                       symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
