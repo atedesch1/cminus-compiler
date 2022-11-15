@@ -13,10 +13,6 @@ static int yylex(void);
 int yyerror(char *s);
 
 %}
-/* 
-%union {
-  TreeNode* node;
-} */
 
 %token ELSE IF INT RETURN VOID WHILE
 %token ID NUM
@@ -24,15 +20,6 @@ int yyerror(char *s);
              EQUAL DIFF ASSIGN SEMICOLON COMMA LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_SQUARE_BRACKET 
              RIGHT_SQUARE_BRACKET LEFT_CURLY_BRACKET RIGHT_CURLY_BRACKET
 %token ERROR
-
-/* %type <node>
-declaracao_lista declaracao var_declaracao tipo_especificador 
-fun_declaracao params param_lista param
-composto_decl local_declaracoes statement_lista statement
-expressao_decl selecao_decl iteracao_decl retorno_decl 
-expressao var simples_expressao relacional 
-soma_expressao soma termo mult 
-fator ativacao args arg_lista */
 
 %% /* Grammar for CMINUS */
 
@@ -53,6 +40,7 @@ declaracao_lista    : declaracao_lista declaracao {
                     ;
 declaracao          : var_declaracao { $$ = $1; }
                     | fun_declaracao { $$ = $1; }
+                    | error { $$ = NULL; }
                     ;
 var_declaracao      : tipo_especificador ID SEMICOLON {
                       $$ = $1;
@@ -104,6 +92,7 @@ param               : tipo_especificador ID {
                       $$->child[0] = newIdNode(Array);
                       $$->child[0]->attr.name = copyString(popId());
                     }
+                    | error { $$ = NULL; }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
                       YYSTYPE t = $2;
