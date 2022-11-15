@@ -134,8 +134,15 @@ static void insertNode( TreeNode * t)
                 switch(t->parent->kind.exp)
                 {
                   case Operator:
+                    /* Check if function was defined */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+                      usageError(t, "implicit declaration is not allowed.", t->attr.name);
                     break;
                   case Return:
+                    /* Check if function was defined */
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+                      usageError(t, "implicit declaration is not allowed.", t->attr.name);
+                    /* TODO: check if the return type of FunctionID is the same as calling func's type */                    
                     break;
                   default:
                     break;
@@ -145,6 +152,7 @@ static void insertNode( TreeNode * t)
                 switch(t->parent->kind.exp)
                 {
                   case Assign:
+                    /* Check if function was defined */
                     if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
                       usageError(t, "implicit declaration is not allowed.", t->attr.name);
                     break;
