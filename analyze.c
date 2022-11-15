@@ -40,11 +40,17 @@ static void declarationError(TreeNode *t, char *message, char *variableName)
   Error = TRUE;
 }
 
+static void usageError(TreeNode *t, char *message, char *variableName)
+{
+  fprintf(listing, "ERROR: bad usage of %s at line %d: %s\n", variableName, t->lineno, message);
+}
+
 static void insertNode( TreeNode * t)
 { switch (t->nodekind)
   { case Statement:
       switch (t->kind.stmt)
-      { case Assign:
+      {
+        case Assign:
         case While:
         case If:
         default:
@@ -120,6 +126,27 @@ static void insertNode( TreeNode * t)
                     else
                       /* Otherwise, we add the new symbol in the table (or just a call of it) */
                       symbolTableInsert(t->attr.name, t->kind.id, t->parent->kind.id, t->lineno, t->scopeNode);
+                    break;
+                  default:
+                    break;
+                }
+              case Expression:
+                switch(t->parent->kind.exp)
+                {
+                  case Operator:
+                    break;
+                  case Return:
+                    break;
+                  default:
+                    break;
+                }
+                break;
+              case Statement:
+                switch(t->parent->kind.exp)
+                {
+                  case Assign:
+                    if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+                      usageError(t, "implicit declaration is not allowed.", t->attr.name);
                     break;
                   default:
                     break;
