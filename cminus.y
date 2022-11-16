@@ -92,7 +92,6 @@ param               : tipo_especificador ID {
                       $$->child[0] = newIdNode(Array);
                       $$->child[0]->attr.name = copyString(popId());
                     }
-                    | error { $$ = NULL; }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
                       YYSTYPE t = $2;
