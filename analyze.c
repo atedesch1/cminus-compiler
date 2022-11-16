@@ -180,6 +180,11 @@ static void insertNode( TreeNode * t)
                 break;
             }
           }
+          else {
+            /* Call of a function without a parent (just a call) */
+            if (symbolTableLookup(t->attr.name, t->scopeNode) == NULL)
+              usageError(t, "implicit declaration is not allowed.", t->attr.name);
+          }
         default:
           break;
       }
