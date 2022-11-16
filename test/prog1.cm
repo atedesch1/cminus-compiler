@@ -1,4 +1,7 @@
 /* Um programa para calcular mdc */
+
+void input(void) { }
+
 int gdc (int u, int v)
 {
    if (v == 0) return u;
