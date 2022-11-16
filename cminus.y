@@ -97,7 +97,6 @@ param               : tipo_especificador ID {
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->scopeNode = currentScope;
-                      /* TODO: we need to add a scope to the function's param */
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET {
                       $$ = $1;
@@ -106,7 +105,6 @@ param               : tipo_especificador ID {
                       $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->scopeNode = currentScope;
-                      /* TODO: we need to add a scope to the function's param */
                     }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
