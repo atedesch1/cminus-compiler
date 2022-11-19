@@ -39,20 +39,46 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
   while (l != NULL) {
     if (strcmp(name, l->id) == 0) {
       if (isInsideScope(currScopeNode, l->scopes)) {
-        /* update the scope list of the found variable */
+        /* if it is needed, we update the scope list of the found variable */
+        bool updateScopeList = true;
         ScopeList s = l->scopes;
-        while (s->next != NULL)
+        ScopeList sLast = s;
+        while (s != NULL) {
+          if (s->scope == currScopeNode->scope) {
+            updateScopeList = false;
+            break;
+          }
+          sLast = s;
           s = s->next;
-        s->next = (ScopeList)malloc(sizeof(struct scopeList));
-        s->next->scope = currScopeNode->scope;
-        s->next->next = NULL;
-        /* update the line list of the found variable */
+        }
+
+        if (updateScopeList) {
+          printf("We're here ; varName: %s\n", name);
+          sLast->next = (ScopeList)malloc(sizeof(struct scopeList));
+          sLast->next->scope = currScopeNode->scope;
+          sLast->next->next = NULL;
+        }
+        /* if it is needed, we update the line list of the found variable */
+        bool updateLineList = true;
         LineList t = l->lines;
-        while (t->next != NULL)
+        LineList tLast = t;
+        while (t != NULL) {
+          if (t->lineno == lineno) {
+            updateLineList = false;
+            break;
+          }
+          tLast = t;
           t = t->next;
-        t->next = (LineList)malloc(sizeof(struct LineList));
-        t->next->lineno = lineno;
-        t->next->next = NULL;
+        }
+
+        if (updateLineList) {
+          tLast->next = (LineList)malloc(sizeof(struct LineList));
+          tLast->next->lineno = lineno;
+          tLast->next->next = NULL;
+        }
+
+        /* since there is a single row for a variable in a scope, we can return */
+        return;
       }
     }
     l = l->next;
@@ -149,14 +175,14 @@ void printSymbolTable(FILE *listing)
         ScopeList s = l->scopes;
         while (s != NULL) 
         {
-          fprintf(listing, "%d\t", s->scope);
+          fprintf(listing, "%d ", s->scope);
           s = s->next;
         }
-        fprintf(listing, "\t");
+        fprintf(listing, "\t\t");
 
         while (t != NULL)
         {
-          fprintf(listing, "%d\t", t->lineno);
+          fprintf(listing, "%d ", t->lineno);
           t = t->next;
         }
         fprintf(listing, "\n");
