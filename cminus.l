@@ -118,14 +118,18 @@ TokenType getToken(void) {
   strncpy(tokenString, yytext, MAXTOKENLEN);
   switch(currentToken) {
     case ID:
-      if (scopeStatus != SEEN_TYPE || scopeStatus != INSIDE_FUNCTION)
+      if (scopeStatus != SEEN_TYPE && scopeStatus != INSIDE_FUNCTION) {
+        // printf("Set to INIT_STATE inside ID\n");
         scopeStatus = INIT_STATE;
+      }
       strncpy(idLexeme, yytext, MAXTOKENLEN);
       saveId(idLexeme);
       break;
     case NUM:
-      if (scopeStatus != INSIDE_FUNCTION)
+      if (scopeStatus != INSIDE_FUNCTION) {
+        // printf("Set to INIT_STATE inside NUM\n");
         scopeStatus = INIT_STATE;
+      }
       numValue = atoi(tokenString);
       break;
     case LEFT_PARENTHESIS:
@@ -148,10 +152,16 @@ TokenType getToken(void) {
         currentScope = insertScope(currentScope, maxScope);
         ++maxScope;
       }
+      // TODO: REMOVE printf("Current scope: %d ; scopeStatus: %d\n", currentScope->scope, scopeStatus);
       break;
     case RIGHT_CURLY_BRACKET:
+      // if (currentScope->parent == NULL) // the error is here probably
+      //  printf("We're here!\n");
       currentScope = currentScope->parent;
-      scopeStatus = INIT_STATE;
+      if (currentScope->scope == -1)
+        /* Return to the global scope */
+        scopeStatus = INIT_STATE;
+      // TODO: REMOVE printf("Current scope: %d ; scopeStatus: %d\n", currentScope->scope, scopeStatus);
       break;
     default:
       break;
