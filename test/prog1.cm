@@ -1,6 +1,7 @@
 /* Um programa para calcular mdc */
 
 void input(void) { }
+void output(int x) { }
 
 int gdc (int u, int v)
 {
