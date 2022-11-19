@@ -141,7 +141,7 @@ TokenType getToken(void) {
       if (scopeStatus == SEEN_LEFT_PARENTHESIS) {
         /* new scope assuming that syntax analysis is correct */
         scopeStatus = SEEN_TYPE;
-        currentScope = insertScope(currentScope, maxScope);
+        currentScope = insertScope(currentScope, savedId[savedIdIndex], maxScope);
         ++maxScope;
       }
       break;
@@ -149,7 +149,7 @@ TokenType getToken(void) {
       if (scopeStatus == SEEN_TYPE)
         scopeStatus = INSIDE_FUNCTION;
       else if (scopeStatus == INSIDE_FUNCTION) {
-        currentScope = insertScope(currentScope, maxScope);
+        currentScope = insertScope(currentScope, savedId[savedIdIndex], maxScope);
         ++maxScope;
       }
       // TODO: REMOVE printf("Current scope: %d ; scopeStatus: %d\n", currentScope->scope, scopeStatus);
@@ -158,7 +158,7 @@ TokenType getToken(void) {
       // if (currentScope->parent == NULL) // the error is here probably
       //  printf("We're here!\n");
       currentScope = currentScope->parent;
-      if (currentScope->scope == -1)
+      if (currentScope->scope->id == -1)
         /* Return to the global scope */
         scopeStatus = INIT_STATE;
       // TODO: REMOVE printf("Current scope: %d ; scopeStatus: %d\n", currentScope->scope, scopeStatus);

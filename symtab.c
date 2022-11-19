@@ -44,7 +44,7 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
         ScopeList s = l->scopes;
         ScopeList sLast = s;
         while (s != NULL) {
-          if (s->scope == currScopeNode->scope) {
+          if (s->scope->id == currScopeNode->scope->id) {
             updateScopeList = false;
             break;
           }
@@ -54,9 +54,7 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
 
         if (updateScopeList) {
           printf("We're here ; varName: %s\n", name);
-          sLast->next = (ScopeList)malloc(sizeof(struct scopeList));
-          sLast->next->scope = currScopeNode->scope;
-          sLast->next->next = NULL;
+          sLast->next = newScopeList(currScopeNode->scope->name, currScopeNode->scope->id);
         }
         /* if it is needed, we update the line list of the found variable */
         bool updateLineList = true;
@@ -88,9 +86,7 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
   l->id = name;
   l->idkind = idkind;
   l->typekind = typekind;
-  l->scopes = (ScopeList)malloc(sizeof(struct scopeList));
-  l->scopes->scope = currScopeNode->scope;
-  l->scopes->next = NULL;
+  l->scopes = newScopeList(currScopeNode->scope->name, currScopeNode->scope->id);
   l->lines = (LineList)malloc(sizeof(struct LineList));
   l->lines->lineno = lineno;
   l->lines->next = NULL;
@@ -175,7 +171,7 @@ void printSymbolTable(FILE *listing)
         ScopeList s = l->scopes;
         while (s != NULL) 
         {
-          fprintf(listing, "%d ", s->scope);
+          fprintf(listing, "%d ", s->scope->id);
           s = s->next;
         }
         fprintf(listing, "\t\t");
