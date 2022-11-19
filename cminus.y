@@ -291,8 +291,9 @@ ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS {
                       $$->attr.name = copyString(popId()); 
                       $$->lineno = lineno;
                       $$->child[0] = $3;
+                      if ($$->child[0] != NULL)
+                        $$->child[0]->parent = $1;
                       $$->scopeNode = currentScope;
-                      $$->parent = $1;
                     }
                     ;
 args                : arg_lista { $$ = $1; }
