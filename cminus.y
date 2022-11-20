@@ -290,8 +290,9 @@ ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS {
                       $$->attr.name = copyString(popId()); 
                       $$->lineno = lineno;
                       $$->child[0] = $3;
-                      if ($$->child[0] != NULL)
-                        $$->child[0]->parent = $1;
+                      for (YYSTYPE t = $$->child[0]; t != NULL; t = t->sibling) {
+                        t->parent = $$;
+                      }
                       $$->scopeNode = currentScope;
                     }
                     ;
