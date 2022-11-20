@@ -34,13 +34,25 @@ static void genExpr(TreeNode *tree)
         case MINUS:
         case TIMES:
         case OVER:
-          if (tree->child[1]->nodekind == Id) {
+          if (tree->child[0]->nodekind == Id && tree->child[1]->nodekind == Id) 
+          {
             emitAssignThreeValues(idStack[idStackTop--], tree->child[0]->attr.name, tree->child[1]->attr.name, tree->attr.op);
           }
-          else {
+          else if (tree->child[0]->nodekind == Id && tree->child[1]->nodekind == Expression) 
+          {
             char *newTmp = getVariableName();
             emitAssignThreeValues(idStack[idStackTop--], tree->child[0]->attr.name, newTmp, tree->attr.op);
             idStack[++idStackTop] = newTmp;
+            cGen(tree->child[1]);
+          }
+          else if (tree->child[0]->nodekind == Expression && tree->child[1]->nodekind == Expression) 
+          {
+            char *newTmp1 = getVariableName();
+            char *newTmp2 = getVariableName();
+            idStack[++idStackTop] = newTmp2;
+            idStack[++idStackTop] = newTmp1;
+            emitAssignThreeValues(idStack[idStackTop - 2], idStack[idStackTop], idStack[idStackTop - 1], tree->attr.op);
+            cGen(tree->child[0]);
             cGen(tree->child[1]);
           }
           break;
