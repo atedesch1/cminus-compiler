@@ -34,6 +34,35 @@ void emitBackup( int loc)
   emitLoc = loc ;
 } /* emitBackup */
 
+/* Procedure emitAssign returns a
+ * assign instruction in the 
+ * intermediate code.
+ */
+void emitAssignTwoValues(char *lhs, char *rhs) {
+   fprintf(code, "%s = %s\n", lhs, rhs);
+}
+
+void emitAssignThreeValues(char *lhs, char *rhs1, char *rhs2, TokenType op) {
+   char opChar;
+   switch(op) {
+      case PLUS:
+         opChar = '+';
+         break;
+      case MINUS:
+         opChar = '-';
+         break;
+      case TIMES:
+         opChar = '*';
+         break;
+      case OVER:
+         opChar = '/';
+         break;
+      default:
+         break;
+   }
+   fprintf(code, "%s = %s %c %s\n", lhs, rhs1, opChar, rhs2);
+}
+
 /* Procedure emitRestore restores the current 
  * code position to the highest previously
  * unemitted position

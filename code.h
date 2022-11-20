@@ -55,4 +55,8 @@ void emitRestore(void);
  */
 void emitRM_Abs( char *op, int r, int a, char * c);
 
+void emitAssignTwoValues(char *lhs, char *rhs);
+
+void emitAssignThreeValues(char *lhs, char *rhs1, char *rhs2, TokenType op);
+
 #endif

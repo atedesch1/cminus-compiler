@@ -12,31 +12,60 @@ static int tmpOffset = 0;
 /* prototype for internal recursive code generator */
 static void cGen(TreeNode *tree);
 
-static void generateStatement(TreeNode *tree)
-{
-  TreeNode *p1, *p2, *p3;
-  int savedLoc1,savedLoc2,currentLoc;
-  int loc;
-  switch (tree->kind.stmt) {
-      case If:
-         break;
-      case Assign:
-         break;
-      case While:
-         break;
-      default:
-         break;
-    }
+static char *idStack[999];
+static int idStackTop = -1;
+
+static char *getVariableName() {
+  static int number = 0;
+  char *buffer = (char*) malloc(sizeof(char)*10);
+  sprintf(buffer, "t%d", number);
+  ++number;
+  return buffer;
 }
 
-static void generateExpression(TreeNode *tree)
-{ 
-  int loc;
-  TreeNode *p1, *p2;
-  switch (tree->kind.exp) {
-    case Constant:
-      break;
+static void genExpr(TreeNode *tree)
+{
+  switch(tree->kind.exp)
+  {
     case Operator:
+      switch(tree->attr.op)
+      {
+        case PLUS:
+        case MINUS:
+        case TIMES:
+        case OVER:
+          if (tree->child[1]->nodekind == Id) {
+            emitAssignThreeValues(idStack[idStackTop--], tree->child[0]->attr.name, tree->child[1]->attr.name, tree->attr.op);
+          }
+          else {
+            char *newTmp = getVariableName();
+            emitAssignThreeValues(idStack[idStackTop--], tree->child[0]->attr.name, newTmp, tree->attr.op);
+            idStack[++idStackTop] = newTmp;
+            cGen(tree->child[1]);
+          }
+          break;
+        default:
+          break;
+      }
+  }
+}
+
+static void genStmt(TreeNode *tree)
+{
+  switch(tree->kind.stmt)
+  {
+    case Assign:
+      if (TraceCode) emitComment("-> assign");
+      if (tree->child[1]->nodekind == Id) {
+        emitAssignTwoValues(tree->child[0]->attr.name, tree->child[1]->attr.name);
+      }
+      else {
+        char *newTmp = getVariableName();
+        emitAssignTwoValues(tree->child[0]->attr.name, newTmp);
+        idStack[++idStackTop] = newTmp;
+        cGen(tree->child[1]);
+      }
+      if (TraceCode) emitComment("<- assign");
       break;
     default:
       break;
@@ -44,21 +73,38 @@ static void generateExpression(TreeNode *tree)
 }
 
 /* Procedure cGen recursively generates code by
- * tree traversal
+ * tree traversal (pre-order)
  */
-static void cGen( TreeNode * tree)
+static void cGen(TreeNode * tree)
 { 
   if (tree != NULL)
-  { 
-   switch (tree->nodekind) {
+  {
+   switch (tree->nodekind) 
+   {
       case Statement:
-        generateStatement(tree);
+        genStmt(tree);
         break;
       case Expression:
-        generateExpression(tree);
+        genExpr(tree);
         break;
       case Id:
-        // genId(tree);
+        switch(tree->kind.id)
+        {
+          case Function:
+            for (int i = 0; i < MAXCHILDREN; ++i) {
+              cGen(tree->child[i]);
+            }
+            break;
+          case Variable:
+            idStack[++idStackTop] = tree->attr.name;
+            break;
+          default:
+            break;
+        }
+        break;
+      case Type:
+        if (tree->child[0]->kind.id == Function)
+          cGen(tree->child[0]);
         break;
       default:
         break;
