@@ -243,8 +243,8 @@ relacional          : LESS_EQUAL_THAN     {
                     ;
 soma_expressao      : soma_expressao soma termo { 
                       $$ = $2;
-                      $$->child[0] = $1;
-                      $$->child[1] = $3;
+                      $$->child[0] = $3;
+                      $$->child[1] = $1;
                       $$->child[0]->parent = $$;
                       $$->child[1]->parent = $$;
                     }
