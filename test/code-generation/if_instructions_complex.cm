@@ -6,4 +6,9 @@ void main(void)
         int y;
         y = y + x;
     }
+    else
+    {
+        int a;
+        a = x;
+    }
 }

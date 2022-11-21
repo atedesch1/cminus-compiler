@@ -23,6 +23,14 @@ static char *getVariableName() {
   return buffer;
 }
 
+static char *getLabelName() {
+  static int number = 0;
+  char *buffer = (char*) malloc(sizeof(char)*10);
+  sprintf(buffer, "L%d", number);
+  ++number;
+  return buffer;
+}
+
 static char *convertConstantToString(int val) {
   char *buffer = (char*) malloc(sizeof(char)*32);
   sprintf(buffer, "%d", val);
@@ -63,7 +71,17 @@ static void genStmt(TreeNode *tree)
     case If:
       if (TraceCode) emitComment("-> if");
       cGen(tree->child[0]);
-      printf("idStackTop: %d\n", idStackTop);
+
+      char *label = getLabelName();
+      emitIfGoto(idStack[idStackTop--], label);
+      cGen(tree->child[1]);
+      
+      emitLabel(label);
+      if (tree->child[2] != NULL) 
+      {
+        cGen(tree->child[2]);
+        emitLabel(getLabelName());
+      }
       if (TraceCode) emitComment("<- if");
       break;
     default:

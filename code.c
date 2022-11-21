@@ -89,6 +89,16 @@ void emitAssignThreeValues(char *lhs, char *rhs1, char *rhs2, TokenType op) {
       fprintf(code, "%s = %s %c%c %s\n", lhs, rhs1, opChar1, opChar2, rhs2);
 }
 
+void emitIfGoto(char *condition, char *label)
+{
+   fprintf(code, "if_false %s goto %s\n", condition, label);
+}
+
+void emitLabel(char *label)
+{
+   fprintf(code, "%s:\n", label);
+}
+
 /* Procedure emitRestore restores the current 
  * code position to the highest previously
  * unemitted position

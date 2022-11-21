@@ -59,4 +59,8 @@ void emitAssignTwoValues(char *lhs, char *rhs);
 
 void emitAssignThreeValues(char *lhs, char *rhs1, char *rhs2, TokenType op);
 
+void emitIfGoto(char *condition, char *label);
+
+void emitLabel(char *label);
+
 #endif
