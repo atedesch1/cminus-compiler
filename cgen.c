@@ -23,42 +23,28 @@ static char *getVariableName() {
   return buffer;
 }
 
+static char *convertConstantToString(int val) {
+  char *buffer = (char*) malloc(sizeof(char)*32);
+  sprintf(buffer, "%d", val);
+  return buffer;
+}
+
 static void genExpr(TreeNode *tree)
 {
   switch(tree->kind.exp)
   {
     case Operator:
-      switch(tree->attr.op)
-      {
-        case PLUS:
-        case MINUS:
-        case TIMES:
-        case OVER:
-          if (tree->child[0]->nodekind == Id && tree->child[1]->nodekind == Id) 
-          {
-            emitAssignThreeValues(idStack[idStackTop--], tree->child[0]->attr.name, tree->child[1]->attr.name, tree->attr.op);
-          }
-          else if (tree->child[0]->nodekind == Id && tree->child[1]->nodekind == Expression) 
-          {
-            char *newTmp = getVariableName();
-            emitAssignThreeValues(idStack[idStackTop--], tree->child[0]->attr.name, newTmp, tree->attr.op);
-            idStack[++idStackTop] = newTmp;
-            cGen(tree->child[1]);
-          }
-          else if (tree->child[0]->nodekind == Expression && tree->child[1]->nodekind == Expression) 
-          {
-            char *newTmp1 = getVariableName();
-            char *newTmp2 = getVariableName();
-            idStack[++idStackTop] = newTmp2;
-            idStack[++idStackTop] = newTmp1;
-            emitAssignThreeValues(idStack[idStackTop - 2], idStack[idStackTop], idStack[idStackTop - 1], tree->attr.op);
-            cGen(tree->child[0]);
-            cGen(tree->child[1]);
-          }
-          break;
-        default:
-          break;
-      }
+      idStack[++idStackTop] = getVariableName();
+      cGen(tree->child[0]);
+      cGen(tree->child[1]);
+      emitAssignThreeValues(idStack[idStackTop - 2], idStack[idStackTop - 1], idStack[idStackTop], tree->attr.op);
+      idStackTop -= 2;
+      break;
+    case Constant:
+      idStack[++idStackTop] = convertConstantToString(tree->attr.val);
+      break;
+    default:
+      break;
   }
 }
 
@@ -68,16 +54,17 @@ static void genStmt(TreeNode *tree)
   {
     case Assign:
       if (TraceCode) emitComment("-> assign");
-      if (tree->child[1]->nodekind == Id) {
-        emitAssignTwoValues(tree->child[0]->attr.name, tree->child[1]->attr.name);
-      }
-      else {
-        char *newTmp = getVariableName();
-        emitAssignTwoValues(tree->child[0]->attr.name, newTmp);
-        idStack[++idStackTop] = newTmp;
-        cGen(tree->child[1]);
-      }
+      cGen(tree->child[0]);
+      cGen(tree->child[1]);
+      emitAssignTwoValues(idStack[idStackTop - 1], idStack[idStackTop]);
+      idStackTop -= 2;
       if (TraceCode) emitComment("<- assign");
+      break;
+    case If:
+      if (TraceCode) emitComment("-> if");
+      cGen(tree->child[0]);
+      printf("idStackTop: %d\n", idStackTop);
+      if (TraceCode) emitComment("<- if");
       break;
     default:
       break;

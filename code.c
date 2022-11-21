@@ -43,24 +43,50 @@ void emitAssignTwoValues(char *lhs, char *rhs) {
 }
 
 void emitAssignThreeValues(char *lhs, char *rhs1, char *rhs2, TokenType op) {
-   char opChar;
+   char opChar1;
+   char opChar2 = ' ';
    switch(op) {
       case PLUS:
-         opChar = '+';
+         opChar1 = '+';
          break;
       case MINUS:
-         opChar = '-';
+         opChar1 = '-';
          break;
       case TIMES:
-         opChar = '*';
+         opChar1 = '*';
          break;
       case OVER:
-         opChar = '/';
+         opChar1 = '/';
+         break;
+      case LESS_EQUAL_THAN:
+         opChar1 = '<';
+         opChar2 = '=';
+         break;
+      case LESS_THAN:
+         opChar1 = '<';
+         break;
+      case GREATER_EQUAL_THAN:
+         opChar1 = '<';
+         opChar2 = '=';
+         break;
+      case GREATER_THAN:
+         opChar1 = '<';
+         break;
+      case EQUAL:
+         opChar1 = '=';
+         opChar2 = '=';
+         break;
+      case DIFF:
+         opChar1 = '!';
+         opChar2 = '=';
          break;
       default:
          break;
    }
-   fprintf(code, "%s = %s %c %s\n", lhs, rhs1, opChar, rhs2);
+   if (opChar2 == ' ')
+      fprintf(code, "%s = %s %c %s\n", lhs, rhs1, opChar1, rhs2);
+   else
+      fprintf(code, "%s = %s %c%c %s\n", lhs, rhs1, opChar1, opChar2, rhs2);
 }
 
 /* Procedure emitRestore restores the current 
