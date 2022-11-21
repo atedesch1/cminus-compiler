@@ -119,8 +119,19 @@ static void cGen(TreeNode * tree)
         switch(tree->kind.id)
         {
           case Function:
-            for (int i = 0; i < MAXCHILDREN; ++i) {
-              cGen(tree->child[i]);
+            /* Function declaration */
+            if (tree->parent->nodekind == Type)
+            {
+              emitLabel(tree->attr.name);
+              cGen(tree->child[1]);
+            }
+            else
+            {
+              /* TODO: we need to change this else */
+              for (int i = 0; i < MAXCHILDREN; ++i) 
+              {
+                cGen(tree->child[i]);
+              }
             }
             break;
           case Variable:
