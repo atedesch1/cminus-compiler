@@ -245,6 +245,11 @@ soma_expressao      : soma_expressao soma termo {
                       $$ = $2;
                       $$->child[0] = $3;
                       $$->child[1] = $1;
+                      if ($$->child[0]->nodekind == Expression && $$->child[1]->nodekind == Id) {
+                        YYSTYPE t = $$->child[0];
+                        $$->child[0] = $$->child[1];
+                        $$->child[1] = t;
+                      }
                       $$->child[0]->parent = $$;
                       $$->child[1]->parent = $$;
                     }
