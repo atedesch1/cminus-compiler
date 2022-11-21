@@ -175,7 +175,6 @@ iteracao_decl       : WHILE LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS stateme
 retorno_decl        : RETURN SEMICOLON { 
                       $$ = newExpNode(Return);
                       $$->type = VoidType;
-                      $$->child[0]->parent = $$;
                     }
                     | RETURN expressao SEMICOLON { 
                       $$ = newExpNode(Return);

@@ -51,6 +51,17 @@ static void genExpr(TreeNode *tree)
     case Constant:
       idStack[++idStackTop] = convertConstantToString(tree->attr.val);
       break;
+    case Return:
+      if (tree->child[0] == NULL) 
+      {
+        emitReturn(NULL);
+      }
+      else
+      {
+        cGen(tree->child[0]);
+        emitReturn(idStack[idStackTop--]);
+      }
+      break;
     default:
       break;
   }

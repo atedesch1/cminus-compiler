@@ -104,6 +104,14 @@ void emitGoto(char *label)
    fprintf(code, "goto %s\n", label);
 }
 
+void emitReturn(char *expr)
+{
+   if (expr == NULL)
+      fprintf(code, "return\n");
+   else
+      fprintf(code, "return %s\n", expr);
+}
+
 /* Procedure emitRestore restores the current 
  * code position to the highest previously
  * unemitted position

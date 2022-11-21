@@ -65,4 +65,6 @@ void emitLabel(char *label);
 
 void emitGoto(char *label);
 
+void emitReturn(char *expr);
+
 #endif
