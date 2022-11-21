@@ -84,6 +84,17 @@ static void genStmt(TreeNode *tree)
       }
       if (TraceCode) emitComment("<- if");
       break;
+    case While:
+      if (TraceCode) emitComment("-> while");
+      char *labelSuccess = getLabelName();
+      char *labelFail = getLabelName();
+      emitLabel(labelSuccess);
+      cGen(tree->child[0]);
+      emitIfGoto(idStack[idStackTop--], labelFail);
+      cGen(tree->child[1]);
+      emitGoto(labelSuccess);
+      emitLabel(labelFail);
+      if (TraceCode) emitComment("<- while");
     default:
       break;
   }

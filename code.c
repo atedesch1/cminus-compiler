@@ -99,6 +99,11 @@ void emitLabel(char *label)
    fprintf(code, "%s:\n", label);
 }
 
+void emitGoto(char *label)
+{
+   fprintf(code, "goto %s\n", label);
+}
+
 /* Procedure emitRestore restores the current 
  * code position to the highest previously
  * unemitted position

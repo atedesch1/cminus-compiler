@@ -63,4 +63,6 @@ void emitIfGoto(char *condition, char *label);
 
 void emitLabel(char *label);
 
+void emitGoto(char *label);
+
 #endif
