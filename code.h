@@ -67,4 +67,6 @@ void emitGoto(char *label);
 
 void emitReturn(char *expr);
 
+void emitAssignIndex(char *lhs, char *array, char *index);
+
 #endif

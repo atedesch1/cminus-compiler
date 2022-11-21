@@ -14,6 +14,7 @@ static void cGen(TreeNode *tree);
 
 static char *idStack[999];
 static int idStackTop = -1;
+static bool arrayLhs = false;
 
 static char *getVariableName() {
   static int number = 0;
@@ -73,6 +74,8 @@ static void genStmt(TreeNode *tree)
   {
     case Assign:
       if (TraceCode) emitComment("-> assign");
+      if (tree->child[0]->kind.id == Array)
+        arrayLhs = true;
       cGen(tree->child[0]);
       cGen(tree->child[1]);
       emitAssignTwoValues(idStack[idStackTop - 1], idStack[idStackTop]);
@@ -148,6 +151,26 @@ static void cGen(TreeNode * tree)
           case Variable:
             idStack[++idStackTop] = tree->attr.name;
             break;
+          case Array:
+            /* Index access */
+            if (tree->parent == NULL || tree->parent->nodekind != Type)
+            {
+              cGen(tree->child[0]);
+              char *index = getVariableName();
+              emitAssignThreeValues(index, idStack[idStackTop--], "4", TIMES);
+              char *buffer = (char*) malloc(sizeof(char)*32);
+              sprintf(buffer, "%s[%s]", tree->attr.name, index);
+              if (arrayLhs)
+              {
+                idStack[++idStackTop] = buffer;
+                arrayLhs = false;
+              }
+              else
+              {
+                idStack[++idStackTop] = getVariableName();
+                emitAssignTwoValues(idStack[idStackTop], buffer);
+              }
+            }
           default:
             break;
         }

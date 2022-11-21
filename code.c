@@ -89,6 +89,11 @@ void emitAssignThreeValues(char *lhs, char *rhs1, char *rhs2, TokenType op) {
       fprintf(code, "%s = %s %c%c %s\n", lhs, rhs1, opChar1, opChar2, rhs2);
 }
 
+void emitAssignIndex(char *lhs, char *array, char *index)
+{
+   fprintf(code, "%s = %s[%s]\n", lhs, array, index);
+}
+
 void emitIfGoto(char *condition, char *label)
 {
    fprintf(code, "if_false %s goto %s\n", condition, label);
