@@ -69,4 +69,8 @@ void emitReturn(char *expr);
 
 void emitAssignIndex(char *lhs, char *array, char *index);
 
+void emitParam(char *param);
+
+void emitCall(char *identifier, int val);
+
 #endif

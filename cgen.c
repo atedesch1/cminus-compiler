@@ -16,6 +16,15 @@ static char *idStack[999];
 static int idStackTop = -1;
 static bool arrayLhs = false;
 
+static void printIdStack()
+{
+  printf("Stack:");
+  for (int i = 0; i < idStackTop; ++i) {
+    printf(" %s", idStack[i]);
+  }
+  printf(" %s\n", idStack[idStackTop]);
+}
+
 static char *getVariableName() {
   static int number = 0;
   char *buffer = (char*) malloc(sizeof(char)*10);
@@ -145,11 +154,27 @@ static void cGen(TreeNode * tree)
             }
             else
             {
-              /* TODO: we need to change this else */
-              for (int i = 0; i < MAXCHILDREN; ++i) 
-              {
-                cGen(tree->child[i]);
+              if (TraceCode) emitComment("-> function call");
+              // idStack[++idStackTop] = tree->attr.name;
+              cGen(tree->child[0]);
+              BucketList functionSymbol = symbolTableLookup(tree->attr.name, scopeTree);
+              int numArgs = functionSymbol->numArgs;
+              for (int i = idStackTop; i > idStackTop - numArgs; --i) {
+                emitParam(idStack[i]);
               }
+              idStackTop = idStackTop - numArgs;
+              if (tree->parent == NULL)
+                // emitCall(idStack[idStackTop--], numArgs);
+                emitCall(tree->attr.name, numArgs);
+              else
+              {
+                char *functionCall = (char*) malloc(sizeof(char) * (strlen(tree->attr.name) + 8));
+                sprintf(functionCall, "call %s,%d", tree->attr.name, numArgs);
+                idStack[++idStackTop] = getVariableName();
+                emitAssignTwoValues(idStack[idStackTop], functionCall);
+                free(functionCall);
+              }
+              if (TraceCode) emitComment("<- function call");
             }
             break;
           case Variable:
@@ -175,6 +200,7 @@ static void cGen(TreeNode * tree)
                 emitAssignTwoValues(idStack[idStackTop], buffer);
               }
             }
+            break;
           default:
             break;
         }

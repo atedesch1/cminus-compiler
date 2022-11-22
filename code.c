@@ -117,6 +117,19 @@ void emitReturn(char *expr)
       fprintf(code, "return %s\n", expr);
 }
 
+void emitParam(char *param)
+{
+   fprintf(code, "param %s\n", param);
+}
+
+void emitCall(char *identifier, int val)
+{
+   if (val == 0)
+      fprintf(code, "call %s\n", identifier);
+   else
+      fprintf(code, "call %s, %d\n", identifier, val);
+}
+
 /* Procedure emitRestore restores the current 
  * code position to the highest previously
  * unemitted position

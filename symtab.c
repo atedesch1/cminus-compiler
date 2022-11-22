@@ -157,9 +157,6 @@ void printSymbolTable(FILE *listing)
           fprintf(listing, "%d ", t->lineno);
           t = t->next;
         }
-        if (l->idkind == Function)
-          // TODO: debug print, remove this later
-          fprintf(listing, " num args: %d", l->numArgs);
         fprintf(listing, "\n");
         l = l->next;
       }
