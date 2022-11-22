@@ -64,14 +64,14 @@ var_declaracao      : tipo_especificador ID SEMICOLON {
 tipo_especificador  : INT { $$ = newTypeNode(Int); }
                     | VOID { $$ = newTypeNode(Void); }
                     ;
-fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
+fun_declaracao      : tipo_especificador ID { savedLineNo = lineno; } LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
                       $$ = $1;
                       $$->child[0] = newIdNode(Function);
                       $$->child[0]->attr.name = copyString(popId());
                       $$->child[0]->parent = $$;
-                      $$->child[0]->lineno = lineno;
-                      $$->child[0]->child[0] = $4;
-                      $$->child[0]->child[1] = $6;
+                      $$->child[0]->lineno = savedLineNo;
+                      $$->child[0]->child[0] = $5;
+                      $$->child[0]->child[1] = $7;
                       $$->child[0]->scopeNode = scopeTree; /* all functions are global */
                     }
                     ;
@@ -296,8 +296,9 @@ ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS {
                       $$->attr.name = copyString(popId()); 
                       $$->lineno = lineno;
                       $$->child[0] = $3;
-                      if ($$->child[0] != NULL)
-                        $$->child[0]->parent = $1;
+                      for (YYSTYPE t = $$->child[0]; t != NULL; t = t->sibling) {
+                        t->parent = $$;
+                      }
                       $$->scopeNode = currentScope;
                     }
                     ;
