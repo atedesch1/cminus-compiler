@@ -33,7 +33,7 @@ static BucketList hashTable[SIZE];
  * first time, otherwise ignored
  */
 // todo: must review this method
-void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno, ScopeNode *currScopeNode)
+void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno, ScopeNode *currScopeNode, int numArgs)
 {
   int h = hash(name);
   for (BucketList l = hashTable[h]; l != NULL; l = l->next)
@@ -57,6 +57,7 @@ void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno,
   /* the variable was not found in currScope, so create a new one */
   BucketList b = (BucketList)malloc(sizeof(struct BucketList));
   b->id = name;
+  b->numArgs = numArgs;
   b->idkind = idkind;
   b->typekind = typekind;
   b->scopes = newScopeList(currScopeNode->scope->name, currScopeNode->scope->id);

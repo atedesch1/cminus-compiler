@@ -57,6 +57,7 @@ static void insertNode(TreeNode *t)
   if (t->nodekind != Id)
     return;
 
+  int numArgs = 0;
   BucketList symbol = symbolTableLookup(t->attr.name, t->scopeNode);
   TreeNode *parent = t->parent;
   bool shouldInsert = true;
@@ -142,6 +143,11 @@ static void insertNode(TreeNode *t)
         {
         case Void:
         case Int:
+          if (t->child[0] != NULL)
+          {
+            for (TreeNode *arg = t->child[0]; arg != NULL; arg = arg->sibling, numArgs++)
+              ;
+          }
           /* Check for double declaration in the scope */
           if (symbol != NULL)
           {
@@ -214,8 +220,12 @@ static void insertNode(TreeNode *t)
   }
 
   if (shouldInsert)
-    symbolTableInsert(t->attr.name, t->kind.id, parent != NULL ? parent->kind.id : symbol->typekind,
-                      t->lineno, t->scopeNode);
+    symbolTableInsert(t->attr.name,
+                      t->kind.id,
+                      parent != NULL ? parent->kind.id : symbol->typekind,
+                      t->lineno,
+                      t->scopeNode,
+                      numArgs);
 }
 
 /* Function buildSymtab constructs the symbol
@@ -263,8 +273,8 @@ static void checkNode(TreeNode *t)
       }
       break;
     // case Return:
-      // BucketList functionSymbol = getFunctionOfReturn(t);
-      // break;
+    // BucketList functionSymbol = getFunctionOfReturn(t);
+    // break;
     default:
       break;
     }

@@ -22,6 +22,7 @@ typedef struct LineList
 typedef struct BucketList
 {
   char *id;
+  int numArgs;
   IdKind idkind;
   TypeKind typekind;
   ScopeList scopes;
@@ -34,7 +35,7 @@ typedef struct BucketList
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno, ScopeNode *currScopeNode);
+void symbolTableInsert(char *name, IdKind idkind, TypeKind typekind, int lineno, ScopeNode *currScopeNode, int numArgs);
 
 /* Function symbolTableLookup returns a pointer to the
  * existing variable in the lookup table or a null pointer
