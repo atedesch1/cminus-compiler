@@ -40,6 +40,7 @@ declaracao_lista    : declaracao_lista declaracao {
                     ;
 declaracao          : var_declaracao { $$ = $1; }
                     | fun_declaracao { $$ = $1; }
+                    | error { $$ = NULL; }
                     ;
 var_declaracao      : tipo_especificador ID SEMICOLON {
                       $$ = $1;
