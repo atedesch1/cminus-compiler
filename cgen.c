@@ -90,12 +90,16 @@ static void genStmt(TreeNode *tree)
       emitIfGoto(idStack[idStackTop--], label);
       cGen(tree->child[1]);
       
-      emitLabel(label);
       if (tree->child[2] != NULL) 
       {
+        char *tmpLabel = getLabelName();
+        emitGoto(tmpLabel);
+        emitLabel(label);
         cGen(tree->child[2]);
-        emitLabel(getLabelName());
+        emitLabel(tmpLabel);
       }
+      else
+        emitLabel(label);
       if (TraceCode) emitComment("<- if");
       break;
     case While:
