@@ -262,7 +262,7 @@ static void checkNode(TreeNode *t)
       {
         switch (t->child[nchild]->nodekind)
         {
-        case Id:
+        case Id:;
           BucketList childSymbol = symbolTableLookup(t->child[nchild]->attr.name, t->child[nchild]->scopeNode);
           if (childSymbol != NULL && childSymbol->typekind == Void)
             typeError(t->child[nchild], "Op applied to non-integer");
