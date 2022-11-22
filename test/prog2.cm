@@ -1,14 +1,17 @@
 /* ordenação por seleção */
 int x[10];
 
+int input(void) { }
+void output(int a) { }
+
 int minloc ( int a[], int low, int high ){
-   int i;   int x;   int k;
+   int i;   int l;   int k;
    k = low;
-   x = a[low];
+   l = a[low];
    i = low + 1;
    while(i<high){
-      if(a[i] < x){
-         x = a[i];
+      if(a[i] < l){
+         l = a[i];
          k = i;
       }
       i = i + 1;

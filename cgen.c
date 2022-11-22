@@ -15,6 +15,7 @@ static void cGen(TreeNode *tree);
 static char *idStack[999];
 static int idStackTop = -1;
 static bool arrayLhs = false;
+static bool emitIfElseGoto = true;
 
 static void printIdStack()
 {
@@ -71,6 +72,7 @@ static void genExpr(TreeNode *tree)
         cGen(tree->child[0]);
         emitReturn(idStack[idStackTop--]);
       }
+      emitIfElseGoto = false;
       break;
     default:
       break;
@@ -102,10 +104,14 @@ static void genStmt(TreeNode *tree)
       if (tree->child[2] != NULL) 
       {
         char *tmpLabel = getLabelName();
-        emitGoto(tmpLabel);
+        if (emitIfElseGoto)
+          emitGoto(tmpLabel);
         emitLabel(label);
         cGen(tree->child[2]);
-        emitLabel(tmpLabel);
+        if (emitIfElseGoto)
+          emitLabel(tmpLabel);
+        else
+          emitIfElseGoto = true;
       }
       else
         emitLabel(label);
@@ -155,16 +161,14 @@ static void cGen(TreeNode * tree)
             else
             {
               if (TraceCode) emitComment("-> function call");
-              // idStack[++idStackTop] = tree->attr.name;
               cGen(tree->child[0]);
               BucketList functionSymbol = symbolTableLookup(tree->attr.name, scopeTree);
               int numArgs = functionSymbol->numArgs;
-              for (int i = idStackTop; i > idStackTop - numArgs; --i) {
+              for (int i = idStackTop - numArgs + 1; i < idStackTop + 1; ++i) {
                 emitParam(idStack[i]);
               }
               idStackTop = idStackTop - numArgs;
               if (tree->parent == NULL)
-                // emitCall(idStack[idStackTop--], numArgs);
                 emitCall(tree->attr.name, numArgs);
               else
               {
