@@ -152,16 +152,11 @@ TokenType getToken(void) {
         currentScope = insertScope(currentScope, savedId[savedIdIndex], maxScope);
         ++maxScope;
       }
-      // TODO: REMOVE printf("Current scope: %d ; scopeStatus: %d\n", currentScope->scope, scopeStatus);
       break;
     case RIGHT_CURLY_BRACKET:
-      // if (currentScope->parent == NULL) // the error is here probably
-      //  printf("We're here!\n");
       currentScope = currentScope->parent;
       if (currentScope->scope->id == -1)
-        /* Return to the global scope */
         scopeStatus = INIT_STATE;
-      // TODO: REMOVE printf("Current scope: %d ; scopeStatus: %d\n", currentScope->scope, scopeStatus);
       break;
     default:
       break;
