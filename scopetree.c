@@ -53,7 +53,7 @@ ScopeNode *insertScope(ScopeNode *currNode, char *name, int prevId) {
     ++(currNode->numChildren);
   } else {
     currNode->children =
-        (ScopeNode **)realloc(currNode->children, (++(currNode->numChildren)));
+        (ScopeNode **)realloc(currNode->children, (++(currNode->numChildren))*sizeof(ScopeNode*));
     currNode->children[currNode->numChildren - 1] = newNode;
     currNode->children[currNode->numChildren - 1]->parent = currNode;
   }
