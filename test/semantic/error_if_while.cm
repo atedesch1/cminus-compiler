@@ -1,0 +1,9 @@
+void func(void) {
+}
+
+void main(void) {
+  
+  if (func()) {}
+
+  while(func()) {}
+}

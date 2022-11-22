@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
     buildSymtab(syntaxTree);
     printScopeTree(scopeTree);
     mainCheck();
-    // if (TraceAnalyze)
-    //  fprintf(listing, "\nChecking Types...\n");
-    // typeCheck(syntaxTree);
-    // if (TraceAnalyze)
-    //  fprintf(listing, "\nType Checking Finished\n");
+    if (TraceAnalyze)
+     fprintf(listing, "\nChecking Types...\n\n");
+    typeCheck(syntaxTree);
+    if (TraceAnalyze)
+     fprintf(listing, "\nType Checking Finished\n");
   }
 #if !NO_CODE
   if (!Error)

@@ -247,18 +247,24 @@ static void checkNode(TreeNode *t)
   case Expression:
     switch (t->kind.exp)
     {
-    case Operator: /* dummy instruction */
-      if ((t->child[0]->type != IntegerType) ||
-          (t->child[1]->type != IntegerType))
-        typeError(t, "Op applied to non-integer");
-      if ((t->attr.op == EQUAL) || (t->attr.op == LESS_THAN))
-        t->type = BooleanType;
-      else
-        t->type = IntegerType;
+    case Operator:
+      for (int nchild = 0; nchild < 2; nchild++)
+      {
+        switch (t->child[nchild]->nodekind)
+        {
+        case Id:
+          BucketList childSymbol = symbolTableLookup(t->child[nchild]->attr.name, t->child[nchild]->scopeNode);
+          if (childSymbol != NULL && childSymbol->typekind == Void)
+            typeError(t->child[nchild], "Op applied to non-integer");
+          break;
+        default:
+          break;
+        }
+      }
       break;
-    case Constant: /* dummy instruction */
-      t->type = IntegerType;
-      break;
+    // case Return:
+      // BucketList functionSymbol = getFunctionOfReturn(t);
+      // break;
     default:
       break;
     }
@@ -266,17 +272,22 @@ static void checkNode(TreeNode *t)
   case Statement:
     switch (t->kind.stmt)
     {
-    case If: /* dummy instruction */
-      if (t->child[0]->type == IntegerType)
-        typeError(t->child[0], "if test is not Boolean");
+    case If:
+    case While:
+      if (t->child[0]->nodekind == Id)
+      {
+        BucketList childSymbol = symbolTableLookup(t->child[0]->attr.name, t->child[0]->scopeNode);
+        if (childSymbol != NULL && childSymbol->typekind == Void)
+          typeError(t->child[0], "can't have void as condition");
+      }
       break;
-    case Assign: /* dummy instruction */
-      if (t->child[0]->type != IntegerType)
-        typeError(t->child[0], "assignment of non-integer value");
-      break;
-    case While: /* dummy instruction */
-      if (t->child[0]->type != IntegerType)
-        typeError(t->child[0], "write of non-integer value");
+    case Assign:
+      if (t->child[1]->nodekind == Id)
+      {
+        BucketList childSymbol = symbolTableLookup(t->child[1]->attr.name, t->child[1]->scopeNode);
+        if (childSymbol != NULL && childSymbol->typekind == Void)
+          typeError(t->child[1], "assignment of non-integer value");
+      }
       break;
     default:
       break;

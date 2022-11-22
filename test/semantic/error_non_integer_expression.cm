@@ -1,0 +1,12 @@
+void func(void) {}
+
+int funcx(void) { return 0; }
+
+void main(void)
+{
+  int x;
+  x = 1 + funcx();
+  x = 1 + func();
+  x = func();
+  x = func() + func() + func();
+}
