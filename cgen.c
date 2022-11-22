@@ -134,7 +134,7 @@ static void cGen(TreeNode * tree)
         {
           case Function:
             /* Function declaration */
-            if (tree->parent->nodekind == Type)
+            if (tree->parent != NULL && tree->parent->nodekind == Type)
             {
               emitLabel(tree->attr.name);
               cGen(tree->child[1]);
