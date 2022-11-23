@@ -37,15 +37,16 @@ static void nullProc(TreeNode *t)
 
 static void declarationError(TreeNode *t, char *message, char *variableName)
 {
-  fprintf(listing, "ERROR: declaration of %s at line %d: %s\n", variableName,
+  fprintf(listing, "SEMANTIC ERROR: declaration of %s at line %d: %s\n", variableName,
           t->lineno, message);
   Error = TRUE;
 }
 
 static void usageError(TreeNode *t, char *message, char *variableName)
 {
-  fprintf(listing, "ERROR: bad usage of %s at line %d: %s\n", variableName,
+  fprintf(listing, "SEMANTIC ERROR: bad usage of %s at line %d: %s\n", variableName,
           t->lineno, message);
+  Error = TRUE;
 }
 
 /* Procedure insertNode inserts
@@ -234,16 +235,11 @@ static void insertNode(TreeNode *t)
 void buildSymtab(TreeNode *syntaxTree)
 {
   traverse(syntaxTree, insertNode, nullProc);
-  if (TraceAnalyze)
-  {
-    fprintf(listing, "\nSymbol table:\n\n");
-    printSymbolTable(listing);
-  }
 }
 
 static void typeError(TreeNode *t, char *message)
 {
-  fprintf(listing, "Type error at line %d: %s\n", t->lineno, message);
+  fprintf(listing, "SEMANTIC ERROR: type error at line %d: %s\n", t->lineno, message);
   Error = TRUE;
 }
 
@@ -324,7 +320,7 @@ void mainCheck()
 {
   if (symbolTableLookup("main", scopeTree) == NULL)
   {
-    fprintf(listing, "ERROR: no main function was found.\n");
+    fprintf(listing, "SEMANTIC ERROR: no main function was found.\n");
     Error = TRUE;
   }
 }

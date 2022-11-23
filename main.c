@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "scopetree.h"
+#include "symtab.h"
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
 #define NO_PARSE FALSE
@@ -78,8 +79,13 @@ int main(int argc, char *argv[])
     if (TraceAnalyze)
       fprintf(listing, "\nBuilding Symbol Table...\n");
     buildSymtab(syntaxTree);
-    printScopeTree(scopeTree);
     mainCheck();
+    if (TraceAnalyze)
+    {
+      fprintf(listing, "\nSymbol table:\n\n");
+      printSymbolTable(listing);
+    }
+    printScopeTree(scopeTree);
     if (TraceAnalyze)
      fprintf(listing, "\nChecking Types...\n\n");
     typeCheck(syntaxTree);
