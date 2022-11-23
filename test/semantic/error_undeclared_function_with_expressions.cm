@@ -1,0 +1,14 @@
+int input(void) { }
+
+int a(void) { }
+
+int b(void) { }
+
+void main(void)
+{
+   int x;
+   int y;
+   x = (input() + a()) * b();
+   y = input();
+   output(gdc(x,y));
+}

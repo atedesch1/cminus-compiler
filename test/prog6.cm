@@ -1,8 +1,0 @@
-int gdc (int u, int v)
-{
-}
-
-void main(void)
-{
-  output(gdc(gdc(gdc(x,y),y),y));
-}

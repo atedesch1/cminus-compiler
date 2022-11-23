@@ -46,24 +46,33 @@ var_declaracao      : tipo_especificador ID SEMICOLON {
                       $$ = $1;
                       $$->child[0] = newIdNode(Variable);
                       $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->parent = $$;
+                      $$->child[0]->lineno = lineno;
+                      $$->child[0]->scopeNode = currentScope;
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET NUM RIGHT_SQUARE_BRACKET SEMICOLON {
                       $$ = $1;
                       $$->child[0] = newIdNode(Array);
                       $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->parent = $$;
+                      $$->child[0]->lineno = lineno;
                       $$->child[0]->child[0] = newExpNode(Constant);
                       $$->child[0]->child[0]->attr.val = numValue;
+                      $$->child[0]->scopeNode = currentScope;
                     }
                     ;
 tipo_especificador  : INT { $$ = newTypeNode(Int); }
                     | VOID { $$ = newTypeNode(Void); }
                     ;
-fun_declaracao      : tipo_especificador ID LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
+fun_declaracao      : tipo_especificador ID { savedLineNo = lineno; } LEFT_PARENTHESIS params RIGHT_PARENTHESIS composto_decl {
                       $$ = $1;
                       $$->child[0] = newIdNode(Function);
                       $$->child[0]->attr.name = copyString(popId());
-                      $$->child[0]->child[0] = $4;
-                      $$->child[0]->child[1] = $6;
+                      $$->child[0]->parent = $$;
+                      $$->child[0]->lineno = savedLineNo;
+                      $$->child[0]->child[0] = $5;
+                      $$->child[0]->child[1] = $7;
+                      $$->child[0]->scopeNode = scopeTree; /* all functions are global */
                     }
                     ;
 params              : param_lista { $$ = $1; }
@@ -85,12 +94,18 @@ param_lista         : param_lista COMMA param {
 param               : tipo_especificador ID { 
                       $$ = $1;
                       $$->child[0] = newIdNode(Variable);
+                      $$->child[0]->parent = $$;
+                      $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->scopeNode = currentScope;
                     }
                     | tipo_especificador ID LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET {
                       $$ = $1;
                       $$->child[0] = newIdNode(Array);
+                      $$->child[0]->parent = $$;
+                      $$->child[0]->lineno = lineno;
                       $$->child[0]->attr.name = copyString(popId());
+                      $$->child[0]->scopeNode = currentScope;
                     }
                     ;
 composto_decl       : LEFT_CURLY_BRACKET local_declaracoes statement_lista RIGHT_CURLY_BRACKET {
@@ -165,12 +180,15 @@ retorno_decl        : RETURN SEMICOLON {
                     | RETURN expressao SEMICOLON { 
                       $$ = newExpNode(Return);
                       $$->child[0] = $2;
+                      $$->child[0]->parent = $$;
                     }
                     ;
 expressao           : var ASSIGN expressao { 
                       $$ = newStmtNode(Assign);
                       $$->child[0] = $1; /* convention: assigned variable is the left child */
                       $$->child[1] = $3;
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                       // $$->type = $$->child[1]->type; /* todo: review this line */
                     }
                     | simples_expressao { $$ = $1; }
@@ -178,17 +196,23 @@ expressao           : var ASSIGN expressao {
 var                 : ID { 
                       $$ = newIdNode(Variable);
                       $$->attr.name = copyString(popId());
+                      $$->lineno = lineno;
+                      $$->scopeNode = currentScope;
                     }
                     | ID LEFT_SQUARE_BRACKET expressao RIGHT_SQUARE_BRACKET { 
                       $$ = newIdNode(Array);
                       $$->attr.name = copyString(popId());
+                      $$->lineno = lineno;
                       $$->child[0] = $3;
+                      $$->scopeNode = currentScope;
                     }
                     ;
 simples_expressao   : soma_expressao relacional soma_expressao { 
                       $$ = $2;
                       $$->child[0] = $1;
                       $$->child[1] = $3;
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                     }
                     | soma_expressao { $$ = $1; }
                     ;
@@ -219,8 +243,15 @@ relacional          : LESS_EQUAL_THAN     {
                     ;
 soma_expressao      : soma_expressao soma termo { 
                       $$ = $2;
-                      $$->child[0] = $1;
-                      $$->child[1] = $3;
+                      $$->child[0] = $3;
+                      $$->child[1] = $1;
+                      if ($$->child[0]->nodekind == Expression && $$->child[1]->nodekind == Id) {
+                        YYSTYPE t = $$->child[0];
+                        $$->child[0] = $$->child[1];
+                        $$->child[1] = t;
+                      }
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                     }
                     | termo { $$ = $1; }
                     ;
@@ -237,6 +268,8 @@ termo               : termo mult fator {
                       $$ = $2;
                       $$->child[0] = $1;
                       $$->child[1] = $3;
+                      $$->child[0]->parent = $$;
+                      $$->child[1]->parent = $$;
                     }
                     | fator { $$ = $1; }
                     ;
@@ -261,7 +294,12 @@ fator               : LEFT_PARENTHESIS expressao RIGHT_PARENTHESIS { $$ = $2; }
 ativacao            : ID LEFT_PARENTHESIS args RIGHT_PARENTHESIS { 
                       $$ = newIdNode(Function);
                       $$->attr.name = copyString(popId()); 
+                      $$->lineno = lineno;
                       $$->child[0] = $3;
+                      for (YYSTYPE t = $$->child[0]; t != NULL; t = t->sibling) {
+                        t->parent = $$;
+                      }
+                      $$->scopeNode = currentScope;
                     }
                     ;
 args                : arg_lista { $$ = $1; }

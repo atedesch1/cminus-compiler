@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include "scopetree.h"
 
 /* Yacc/Bison generates internally its own values
  * for the tokens. Other files can access these values
@@ -48,6 +49,9 @@ extern FILE* listing; /* listing output text file */
 extern FILE* code; /* code text file for TM simulator */
 
 extern int lineno; /* source line number for listing */
+extern ScopeNode *scopeTree; /* scope tree */
+extern ScopeNode *currentScope; /* current scope node */
+extern int maxScope; /* stores the maximum scope reached */
 
 /**************************************************/
 /***********   Syntax tree for parsing ************/
@@ -60,21 +64,24 @@ typedef enum {Variable, Array, Function} IdKind;
 typedef enum {Void, Int} TypeKind;
 
 /* ExpType is used for type checking */
-typedef enum {VoidType, IntegerType} ExpType;
+typedef enum {VoidType, IntegerType, BooleanType} ExpType;
 
 #define MAXCHILDREN 3
 
 typedef struct treeNode
-   { struct treeNode * child[MAXCHILDREN];
-     struct treeNode * sibling;
-     int lineno;
-     NodeKind nodekind;
-     union { StatementKind stmt; ExpressionKind exp; IdKind id; TypeKind type; } kind;
-     union { TokenType op;
-             int val;
-             char * name; } attr;
-      ExpType type; /* for type checking of exps */
-   } TreeNode;
+{ 
+   struct treeNode * child[MAXCHILDREN];
+   struct treeNode * sibling;
+   struct treeNode * parent;
+   int lineno;
+   ScopeNode *scopeNode;
+   NodeKind nodekind;
+   union { StatementKind stmt; ExpressionKind exp; IdKind id; TypeKind type; } kind;
+   union { TokenType op;
+           int val;
+           char * name; } attr;
+   ExpType type; /* for type checking of exps */   
+} TreeNode;
 
 /**************************************************/
 /***********   Flags for tracing       ************/

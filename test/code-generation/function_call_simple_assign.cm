@@ -1,0 +1,13 @@
+int sum(int x, int y) 
+{
+   return x + y;
+}
+
+void main(void)
+{
+   int x;
+   int y;
+   x = 3;
+   y = 4;
+   y = sum(x, y);
+}

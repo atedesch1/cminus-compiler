@@ -27,6 +27,9 @@ char *popId() {
   return savedId[savedIdIndex--];
 }
 
+/* Additional states of FSM to identify scope */
+enum ScopeStatusEnum {INIT_STATE, SEEN_LEFT_PARENTHESIS, SEEN_TYPE, INSIDE_FUNCTION};
+
 %}
 
 digit       [0-9]
@@ -96,6 +99,10 @@ whitespace  [ \t]+
 %%
 
 TokenType getToken(void) {
+  /* Variable for scope identification */
+  static enum ScopeStatusEnum scopeStatus = INIT_STATE;
+
+  /* Function starts here */
   static int firstTime = TRUE;
   TokenType currentToken;
   if (firstTime) {
@@ -103,22 +110,70 @@ TokenType getToken(void) {
     lineno++;
     yyin = source;
     yyout = listing;
+    scopeTree = newRootScopeNode();
+    currentScope = scopeTree;
+    maxScope = -1;
   }
   currentToken = yylex();
   strncpy(tokenString, yytext, MAXTOKENLEN);
   switch(currentToken) {
     case ID:
+      if (scopeStatus != SEEN_TYPE && scopeStatus != INSIDE_FUNCTION) {
+        // printf("Set to INIT_STATE inside ID\n");
+        scopeStatus = INIT_STATE;
+      }
       strncpy(idLexeme, yytext, MAXTOKENLEN);
       saveId(idLexeme);
       break;
     case NUM:
+      if (scopeStatus != INSIDE_FUNCTION) {
+        // printf("Set to INIT_STATE inside NUM\n");
+        scopeStatus = INIT_STATE;
+      }
       numValue = atoi(tokenString);
+      break;
+    case LEFT_PARENTHESIS:
+      if (scopeStatus == INIT_STATE)
+        scopeStatus = SEEN_LEFT_PARENTHESIS;
+      break;
+    case INT:
+    case VOID:
+      if (scopeStatus == SEEN_LEFT_PARENTHESIS) {
+        /* new scope assuming that syntax analysis is correct */
+        scopeStatus = SEEN_TYPE;
+        currentScope = insertScope(currentScope, savedId[savedIdIndex], maxScope);
+        ++maxScope;
+      }
+      break;
+    case LEFT_CURLY_BRACKET:
+      if (scopeStatus == SEEN_TYPE)
+        scopeStatus = INSIDE_FUNCTION;
+      else if (scopeStatus == INSIDE_FUNCTION) {
+        currentScope = insertScope(currentScope, savedId[savedIdIndex], maxScope);
+        ++maxScope;
+      }
+      break;
+    case RIGHT_CURLY_BRACKET:
+      currentScope = currentScope->parent;
+      if (currentScope->scope->id == -1)
+        scopeStatus = INIT_STATE;
       break;
     default:
       break;
   }
   if (TraceScan) {
     fprintf(listing,"\t%d: ", lineno);
+
+    /* DEBUG PURPOSES. SHOULD REMOVE LATER. */ 
+    /* switch(currentToken) {
+      case LEFT_CURLY_BRACKET:
+      case RIGHT_CURLY_BRACKET:
+        fprintf(listing,"\tCurrent scope:%d\n", currentScope->scope);
+        break;
+      default:
+        break;
+    } */
+    /* DEBUG PURPOSES. SHOULD REMOVE LATER. */
     printToken(currentToken, tokenString);
   }
   return currentToken;

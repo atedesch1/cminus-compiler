@@ -1,14 +1,16 @@
 #include "globals.h"
+#include "scopetree.h"
+#include "symtab.h"
 
 /* set NO_PARSE to TRUE to get a scanner-only compiler */
 #define NO_PARSE FALSE
 /* set NO_ANALYZE to TRUE to get a parser-only compiler */
-#define NO_ANALYZE TRUE
+#define NO_ANALYZE FALSE
 
 /* set NO_CODE to TRUE to get a compiler that does not
  * generate code
  */
-#define NO_CODE TRUE
+#define NO_CODE FALSE
 
 #include "util.h"
 #if NO_PARSE
@@ -25,6 +27,9 @@
 
 /* allocate global variables */
 int lineno = 0;
+int maxScope;
+ScopeNode *scopeTree;
+ScopeNode *currentScope;
 FILE *source;
 FILE *listing;
 FILE *code;
@@ -33,7 +38,7 @@ FILE *code;
 int EchoSource = FALSE;
 int TraceScan = TRUE;
 int TraceParse = TRUE;
-int TraceAnalyze = FALSE;
+int TraceAnalyze = TRUE;
 int TraceCode = FALSE;
 
 int Error = FALSE;
@@ -74,11 +79,18 @@ int main(int argc, char *argv[])
     if (TraceAnalyze)
       fprintf(listing, "\nBuilding Symbol Table...\n");
     buildSymtab(syntaxTree);
+    mainCheck();
     if (TraceAnalyze)
-      fprintf(listing, "\nChecking Types...\n");
+    {
+      fprintf(listing, "\nSymbol table:\n\n");
+      printSymbolTable(listing);
+    }
+    printScopeTree(scopeTree);
+    if (TraceAnalyze)
+     fprintf(listing, "\nChecking Types...\n\n");
     typeCheck(syntaxTree);
     if (TraceAnalyze)
-      fprintf(listing, "\nType Checking Finished\n");
+     fprintf(listing, "\nType Checking Finished\n");
   }
 #if !NO_CODE
   if (!Error)
@@ -87,7 +99,7 @@ int main(int argc, char *argv[])
     int fnlen = strcspn(pgm, ".");
     codefile = (char *)calloc(fnlen + 4, sizeof(char));
     strncpy(codefile, pgm, fnlen);
-    strcat(codefile, ".cm");
+    strcat(codefile, ".cmic");
     code = fopen(codefile, "w");
     if (code == NULL)
     {
